@@ -1,0 +1,19 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Environment / local config
+.env
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated
+desktop.ini
