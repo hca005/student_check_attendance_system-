@@ -1,20 +1,13 @@
 <?php
-// ============================================================
-// helpers/Middleware.php
-// Phân quyền RBAC: Admin / Teacher / Student
-// Điểm cộng kỹ thuật: RBAC Middleware (+5–10%)
-// ============================================================
-
-class Middleware
+if (!class_exists("Middleware")) { class Middleware
 {
-    // ── Khởi động session nếu chưa có ─────────────────────
     private static function startSession(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_set_cookie_params([
                 'lifetime' => SESSION_LIFETIME,
                 'path'     => '/',
-                'secure'   => false,      // đổi true khi dùng HTTPS
+                'secure'   => false,
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
@@ -22,7 +15,6 @@ class Middleware
         }
     }
 
-    // ── Yêu cầu đã đăng nhập ──────────────────────────────
     public static function requireLogin(): void
     {
         self::startSession();
@@ -33,7 +25,6 @@ class Middleware
         }
     }
 
-    // ── Yêu cầu một hoặc nhiều role cụ thể ────────────────
     public static function requireRole(string|array $roles): void
     {
         self::requireLogin();
@@ -45,24 +36,11 @@ class Middleware
         }
     }
 
-    // ── Shortcut cho từng role ─────────────────────────────
-    public static function requireAdmin(): void
-    {
-        self::requireRole('admin');
-    }
+    public static function requireAdmin(): void { self::requireRole('admin'); }
+    public static function requireTeacher(): void { self::requireRole(['admin', 'teacher']); }
+    public static function teacher(): void { self::requireRole(['admin', 'teacher']); }
+    public static function requireStudent(): void { self::requireRole('student'); }
 
-    // Teacher hoặc Admin đều được phép
-    public static function requireTeacher(): void
-    {
-        self::requireRole(['admin', 'teacher']);
-    }
-
-    public static function requireStudent(): void
-    {
-        self::requireRole('student');
-    }
-
-    // ── Chặn user đã login vào trang guest (login page) ───
     public static function guest(): void
     {
         self::startSession();
@@ -71,41 +49,31 @@ class Middleware
         }
     }
 
-    // ── Redirect theo role sau khi login ──────────────────
     public static function redirectByRole(string $role): void
     {
         switch ($role) {
-            case 'admin':
-                header('Location: ' . APP_URL . '/admin/dashboard.php');
-                break;
-            case 'teacher':
-                header('Location: ' . APP_URL . '/teacher/dashboard.php');
-                break;
-            case 'student':
-                header('Location: ' . APP_URL . '/student/dashboard.php');
-                break;
-            default:
-                header('Location: ' . APP_URL . '/login.php');
+            case 'admin':   header('Location: ' . APP_URL . '/admin/dashboard.php'); break;
+            case 'teacher': header('Location: ' . APP_URL . '/teacher/dashboard.php'); break;
+            case 'student': header('Location: ' . APP_URL . '/student/dashboard.php'); break;
+            default:        header('Location: ' . APP_URL . '/login.php');
         }
         exit;
     }
 
-    // ── Lấy thông tin user hiện tại từ session ────────────
     public static function user(): array
     {
         self::startSession();
         return [
-            'id'        => $_SESSION['user_id']   ?? null,
-            'full_name' => $_SESSION['full_name']  ?? '',
-            'email'     => $_SESSION['email']      ?? '',
-            'role'      => $_SESSION['role']       ?? '',
+            'id'        => $_SESSION['user_id']  ?? null,
+            'full_name' => $_SESSION['full_name'] ?? '',
+            'email'     => $_SESSION['email']     ?? '',
+            'role'      => $_SESSION['role']      ?? '',
         ];
     }
 
-    // ── Kiểm tra role không redirect ──────────────────────
     public static function is(string $role): bool
     {
         self::startSession();
         return ($_SESSION['role'] ?? '') === $role;
     }
-}
+}}

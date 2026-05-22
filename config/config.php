@@ -16,7 +16,7 @@ define('DB_CHARSET', 'utf8mb4');
 define('APP_NAME',    'Attendance & Engagement Tracker');
 define('APP_VERSION', '1.0.0');
 define('APP_ROOT',    dirname(__DIR__));     // thư mục gốc dự án
-define('APP_URL',     'http://localhost/attendance_system/public'); // KHÔNG có dấu / cuối
+define('APP_URL',     'http://localhost/student_check_attendance_system-/public'); // KHÔNG có dấu / cuối
 
 // ── Session ───────────────────────────────────────────────
 define('SESSION_LIFETIME', 3600);   // 1 giờ (giây)
