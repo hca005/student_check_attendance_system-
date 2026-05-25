@@ -100,7 +100,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
         <div class="card p-3">
             <h6 class="fw-bold mb-3"><i class="bi bi-lightning-fill me-2 text-warning"></i>Thao tác nhanh</h6>
             <div class="d-flex flex-wrap gap-2">
-                <a href="<?= APP_URL ?>/admin/users.php?action=create" class="btn btn-primary btn-sm">
+                <a href="<?= APP_URL ?>/index.php?page=admin_users_create" class="btn btn-primary btn-sm">
                     <i class="bi bi-person-plus me-1"></i>Tạo tài khoản
                 </a>
                 <a href="<?= APP_URL ?>/admin/courses.php?action=create" class="btn btn-warning btn-sm text-dark">

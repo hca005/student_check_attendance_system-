@@ -162,3 +162,144 @@ input.is-invalid { border-color: var(--danger); }
 @media (max-width: 600px) {
   .stat-cards { grid-template-columns: 1fr; }
 }
+
+/* Admin user management */
+.page-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.users-filter,
+.users-table-card,
+.user-form-card {
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.filters-grid,
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.filters-grid {
+  grid-template-columns: 2fr repeat(3, minmax(140px, 1fr));
+}
+
+.plain-input {
+  padding: 10px 12px !important;
+}
+
+.filter-actions,
+.form-actions,
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-actions,
+.form-actions {
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.table-header strong {
+  display: block;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.table-header span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-cell strong {
+  display: block;
+  font-weight: 700;
+}
+
+.user-cell span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.pagination a {
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  background: #fff;
+  font-weight: 600;
+}
+
+.pagination a.active,
+.pagination a:hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.error-list {
+  margin: 8px 0 0 18px;
+}
+
+.stat-blue { background: #DBEAFE; color: #1D4ED8; font-weight: 800; }
+.stat-green { background: #D1FAE5; color: #047857; font-weight: 800; }
+.stat-orange { background: #FEF3C7; color: #B45309; font-weight: 800; }
+
+@media (max-width: 900px) {
+  .page-heading {
+    flex-direction: column;
+  }
+
+  .filters-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions,
+  .form-actions {
+    justify-content: flex-start;
+  }
+}

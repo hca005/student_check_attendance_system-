@@ -4,8 +4,8 @@
 // Xử lý đăng nhập và đăng xuất
 // ============================================================
 
-require_once APP_ROOT . '/config/Database.php';
-require_once APP_ROOT . '/helpers/Middleware.php';
+require_once APP_ROOT . '/config/database.php';
+require_once APP_ROOT . '/helpers/middleware.php';
 
 class AuthController
 {
