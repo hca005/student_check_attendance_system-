@@ -1,90 +1,68 @@
-<?php
-// views/teacher/quiz/questions_form.php
-require_once APP_ROOT . '/views/layouts/header.php';
-?>
+<?php require_once APP_ROOT . '/views/layouts/header.php'; ?>
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h2><?php echo $questionId ? 'Sửa Câu hỏi' : 'Thêm Câu hỏi Mới'; ?></h2>
-            <p class="text-muted">Quiz: <?php echo htmlspecialchars($quiz['title']); ?></p>
+<div class="page-title"><?= $questionId ? 'Sửa Câu hỏi' : 'Thêm Câu hỏi Mới' ?></div>
+<p class="page-sub">Quiz: <?= htmlspecialchars($quiz['title']) ?></p>
 
-            <?php if ($error): ?>
-                <div class="alert alert-danger">
-                    <?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
+<?php if ($error): ?>
+<div style="background:#FEE2E2;border:1px solid #EF4444;color:#991B1B;padding:12px 16px;border-radius:8px;margin-bottom:16px">
+    ✕ <?= htmlspecialchars($error) ?>
+</div>
+<?php endif; ?>
 
-            <div class="card">
-                <div class="card-body">
-                    <form method="POST">
-                        <input type="hidden" name="quiz_id" value="<?php echo $quiz['id']; ?>">
-                        <?php if ($questionId): ?>
-                            <input type="hidden" name="id" value="<?php echo $questionId; ?>">
-                        <?php endif; ?>
+<div style="max-width:600px">
+<div class="card" style="padding:24px">
+    <form method="POST">
+        <input type="hidden" name="quiz_id" value="<?= $quiz['id'] ?>">
+        <?php if ($questionId): ?>
+        <input type="hidden" name="id" value="<?= $questionId ?>">
+        <?php endif; ?>
 
-                        <div class="mb-3">
-                            <label for="question_text" class="form-label">Nội dung Câu hỏi *</label>
-                            <textarea name="question_text" id="question_text" class="form-control" rows="3" required><?php echo htmlspecialchars($question['question_text'] ?? ''); ?></textarea>
-                        </div>
+        <div style="margin-bottom:16px">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Nội dung Câu hỏi *</label>
+            <textarea name="question_text" rows="3" required style="width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;resize:vertical"><?= htmlspecialchars($question['question_text'] ?? '') ?></textarea>
+        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="option_a" class="form-label">Đáp án A *</label>
-                                <input type="text" name="option_a" id="option_a" class="form-control" 
-                                       value="<?php echo htmlspecialchars($question['option_a'] ?? ''); ?>" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="option_b" class="form-label">Đáp án B *</label>
-                                <input type="text" name="option_b" id="option_b" class="form-control" 
-                                       value="<?php echo htmlspecialchars($question['option_b'] ?? ''); ?>" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="option_c" class="form-label">Đáp án C</label>
-                                <input type="text" name="option_c" id="option_c" class="form-control" 
-                                       value="<?php echo htmlspecialchars($question['option_c'] ?? ''); ?>">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="option_d" class="form-label">Đáp án D</label>
-                                <input type="text" name="option_d" id="option_d" class="form-control" 
-                                       value="<?php echo htmlspecialchars($question['option_d'] ?? ''); ?>">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="correct_option" class="form-label">Đáp án Đúng *</label>
-                                <select name="correct_option" id="correct_option" class="form-select" required>
-                                    <option value="A" <?php echo ($question && $question['correct_option'] === 'A') ? 'selected' : ''; ?>>A</option>
-                                    <option value="B" <?php echo ($question && $question['correct_option'] === 'B') ? 'selected' : ''; ?>>B</option>
-                                    <option value="C" <?php echo ($question && $question['correct_option'] === 'C') ? 'selected' : ''; ?>>C</option>
-                                    <option value="D" <?php echo ($question && $question['correct_option'] === 'D') ? 'selected' : ''; ?>>D</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="points" class="form-label">Điểm *</label>
-                                <input type="number" name="points" id="points" class="form-control" 
-                                       value="<?php echo htmlspecialchars($question['points'] ?? '1.00'); ?>" 
-                                       step="0.01" min="0.01" required>
-                            </div>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check"></i> <?php echo $questionId ? 'Cập nhật' : 'Thêm'; ?>
-                            </button>
-                            <a href="<?php echo APP_URL; ?>/teacher/quiz/questions_list.php?quiz_id=<?php echo $quiz['id']; ?>" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Quay lại
-                            </a>
-                        </div>
-                    </form>
-                </div>
+        <?php foreach (['A','B','C','D'] as $opt): ?>
+        <div style="margin-bottom:12px">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">
+                Đáp án <?= $opt ?> <?= in_array($opt,['A','B']) ? '<span style="color:#EF4444">*</span>' : '<span style="color:#94A3B8">(tuỳ chọn)</span>' ?>
+            </label>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:28px;height:28px;border-radius:50%;background:<?= in_array($opt,['A','B'])?'#2563EB':'#E2E8F0' ?>;color:<?= in_array($opt,['A','B'])?'#fff':'#64748B' ?>;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0"><?= $opt ?></div>
+                <input type="text" name="option_<?= strtolower($opt) ?>" <?= in_array($opt,['A','B']) ? 'required' : '' ?>
+                    style="flex:1;padding:8px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px"
+                    value="<?= htmlspecialchars($question['option_'.strtolower($opt)] ?? '') ?>"
+                    placeholder="Nhập đáp án <?= $opt ?>...">
             </div>
         </div>
-    </div>
+        <?php endforeach; ?>
+
+        <div style="margin-bottom:16px;padding:16px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:10px">Đáp án Đúng *</label>
+            <div style="display:flex;gap:10px">
+                <?php foreach (['A','B','C','D'] as $opt): ?>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid #E2E8F0;border-radius:8px;font-weight:600;font-size:14px;transition:all 0.2s"
+                    onclick="this.parentElement.querySelectorAll('label').forEach(l=>l.style.cssText='display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid #E2E8F0;border-radius:8px;font-weight:600;font-size:14px');this.style.cssText='display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:2px solid #2563EB;border-radius:8px;font-weight:600;font-size:14px;background:#EFF6FF;color:#2563EB'">
+                    <input type="radio" name="correct_option" value="<?= $opt ?>" <?= ($question['correct_option'] ?? '') === $opt ? 'checked' : '' ?> style="accent-color:#2563EB">
+                    <?= $opt ?>
+                </label>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <div style="margin-bottom:20px">
+            <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Điểm *</label>
+            <input type="number" name="points" step="0.25" min="0.25" required
+                style="width:120px;padding:8px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px"
+                value="<?= htmlspecialchars($question['points'] ?? '1.00') ?>">
+        </div>
+
+        <div style="display:flex;gap:10px">
+            <button type="submit" class="btn btn-primary"><?= $questionId ? 'Cập nhật' : 'Thêm câu hỏi' ?></button>
+            <a href="<?= APP_URL ?>/teacher/quiz/questions_list.php?quiz_id=<?= $quiz['id'] ?>" class="btn btn-outline">Quay lại</a>
+        </div>
+    </form>
+</div>
 </div>
 
 <?php require_once APP_ROOT . '/views/layouts/footer.php'; ?>
