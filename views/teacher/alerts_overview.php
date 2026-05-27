@@ -16,11 +16,11 @@ if ($openCount > 0):
     <div class="table-wrap">
         <table>
             <thead>
-                <tr><th>Sinh viên</th><th>Mã SV</th><th>Môn</th><th>Loại</th><th>Nội dung</th><th>Trạng thái</th></tr>
+                <tr><th>Sinh viên</th><th>Mã SV</th><th>Môn</th><th>Loại</th><th>Nội dung</th><th>Trạng thái</th><th></th></tr>
             </thead>
             <tbody>
             <?php if (empty($alerts)): ?>
-                <tr><td colspan="6" style="text-align:center;color:#94A3B8;padding:32px">Không có alert nào.</td></tr>
+                <tr><td colspan="7" style="text-align:center;color:#94A3B8;padding:32px">Không có alert nào.</td></tr>
             <?php else: ?>
             <?php foreach ($alerts as $a): ?>
             <tr>
@@ -29,11 +29,7 @@ if ($openCount > 0):
                 <td><span class="badge badge-primary"><?= htmlspecialchars($a['course_name']) ?></span></td>
                 <td>
                     <?php
-                    $typeMap = [
-                        'high_absence'   => ['Vắng nhiều','#FEE2E2','#991B1B'],
-                        'low_engagement' => ['Tương tác thấp','#FEF3C7','#92400E'],
-                        'missed_quiz'    => ['Bỏ lỡ quiz','#EFF6FF','#1D4ED8'],
-                    ];
+                    $typeMap = ['high_absence'=>['Vắng nhiều','#FEE2E2','#991B1B'],'low_engagement'=>['Tương tác thấp','#FEF3C7','#92400E'],'missed_quiz'=>['Bỏ lỡ quiz','#EFF6FF','#1D4ED8']];
                     $t = $typeMap[$a['alert_type']] ?? [$a['alert_type'],'#F1F5F9','#374151'];
                     ?>
                     <span class="badge" style="background:<?= $t[1] ?>;color:<?= $t[2] ?>"><?= $t[0] ?></span>
@@ -46,6 +42,7 @@ if ($openCount > 0):
                     ?>
                     <span class="badge" style="background:<?= $st[1] ?>;color:<?= $st[2] ?>"><?= $st[0] ?></span>
                 </td>
+                <td><a href="<?= APP_URL ?>/teacher/alert_detail.php?student_id=<?= $a['student_id'] ?>&course_id=<?= $a['course_id'] ?>" class="btn btn-outline btn-sm">Chi tiết</a></td>
             </tr>
             <?php endforeach; ?>
             <?php endif; ?>

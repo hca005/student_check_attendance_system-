@@ -29,21 +29,21 @@ $upcoming = $db->query(
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<div class="page-title">My Dashboard</div>
-<p class="page-sub">Overview of your courses and classroom activity</p>
+<div class="page-title">Trang chủ Giáo viên</div>
+<p class="page-sub">Tổng quan khóa học và hoạt động lớp học</p>
 
 <div class="stat-cards">
   <div class="card stat-card">
     <div class="stat-icon" style="background:#EFF6FF">
       <svg fill="none" viewBox="0 0 24 24" stroke="#2563EB" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     </div>
-    <div><div class="stat-value"><?= count($myCourses) ?></div><div class="stat-label">My Courses</div></div>
+    <div><div class="stat-value"><?= count($myCourses) ?></div><div class="stat-label">Khóa học của tôi</div></div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:#F0FDF4">
       <svg fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
     </div>
-    <div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-label">Students</div></div>
+    <div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-label">Sinh viên</div></div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:#FFF7ED">
@@ -51,7 +51,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
     </div>
     <div>
       <div class="stat-value"><?= $totalSessions ?></div>
-      <div class="stat-label">Total Sessions</div>
+      <div class="stat-label">Tổng buổi học</div>
       <?php if ($activeSessions): ?>
       <div style="font-size:11px;margin-top:2px"><span class="badge badge-success"><?= $activeSessions ?> active</span></div>
       <?php endif; ?>
@@ -61,25 +61,25 @@ require_once APP_ROOT . '/views/layouts/header.php';
     <div class="stat-icon" style="background:#FEF2F2">
       <svg fill="none" viewBox="0 0 24 24" stroke="#EF4444" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </div>
-    <div><div class="stat-value"><?= $openAlerts ?></div><div class="stat-label">Open Alerts</div></div>
+    <div><div class="stat-value"><?= $openAlerts ?></div><div class="stat-label">Cảnh báo mở</div></div>
   </div>
 </div>
 
 <!-- Quick actions -->
 <div class="card" style="padding:18px;margin-bottom:24px">
-  <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:#374151">⚡ Quick Actions</div>
+  <div style="font-weight:700;font-size:13px;margin-bottom:12px;color:#374151">⚡ Thao tác nhanh</div>
   <div style="display:flex;flex-wrap:wrap;gap:10px">
     <a href="<?= APP_URL ?>/teacher/sessions.php?action=create" class="btn btn-primary btn-sm">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      New Session
+      Buổi học mới
     </a>
     <a href="<?= APP_URL ?>/teacher/attendance.php" class="btn btn-success btn-sm">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      Take Attendance
+      Điểm danh
     </a>
     <a href="<?= APP_URL ?>/teacher/quiz.php?action=create" class="btn btn-sm" style="background:#F59E0B;color:#fff">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
-      Create Quiz
+      Tạo Quiz
     </a>
     <?php if ($openAlerts > 0): ?>
     <a href="<?= APP_URL ?>/teacher/alerts.php" class="btn btn-danger btn-sm">
@@ -92,10 +92,10 @@ require_once APP_ROOT . '/views/layouts/header.php';
 <!-- Upcoming sessions -->
 <?php if (!empty($upcoming)): ?>
 <div class="card" style="margin-bottom:24px">
-  <div style="padding:16px 20px 12px;font-weight:700;font-size:14px;border-bottom:1px solid #F1F5F9">📅 Upcoming &amp; Active Sessions</div>
+  <div style="padding:16px 20px 12px;font-weight:700;font-size:14px;border-bottom:1px solid #F1F5F9">📅 Buổi học sắp tới &amp; đang diễn ra</div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Date</th><th>Time</th><th>Course</th><th>Title</th><th>Status</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Ngày</th><th>Giờ</th><th>Môn học</th><th>Tên buổi</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
       <tbody>
       <?php foreach ($upcoming as $s):
         $statusCls = ['upcoming'=>'badge-gray','active'=>'badge-success','ended'=>''];
@@ -121,7 +121,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
 <?php endif; ?>
 
 <!-- My courses grid -->
-<div style="font-weight:700;font-size:15px;margin-bottom:14px">My Courses</div>
+<div style="font-weight:700;font-size:15px;margin-bottom:14px">Khóa học của tôi</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
 <?php foreach ($myCourses as $c):
   $stuCount = $db->query("SELECT COUNT(*) FROM course_enrollments WHERE course_id=? AND role='student'", [$c['id']])->fetchColumn();
