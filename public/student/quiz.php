@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * public/student/quiz.php
  * Route cho quiz: danh sách, làm bài, nộp bài
@@ -122,7 +122,7 @@ $courseId = (int)($_GET['course_id'] ?? 0);
 
 $courses = $db->query(
     "SELECT c.id, c.course_code, c.course_name, c.semester
-     FROM courses c JOIN course_enrollments ce ON ce.course_id=c.id
+     FROM courses c JOIN enrollments ce ON ce.course_id=c.id
      WHERE ce.user_id=? AND ce.role='student' AND c.is_active=1
      ORDER BY c.course_name ASC",
     [$studentId]

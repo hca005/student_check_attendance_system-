@@ -6,7 +6,6 @@ require_once __DIR__ . '/../helpers/middleware.php';
 class UserController
 {
     private UserModel $model;
-    private array $validRoles = ['admin', 'teacher', 'student'];
 
     public function __construct()
     {
@@ -25,21 +24,25 @@ class UserController
             'page' => max(1, (int)($_GET['p'] ?? 1)),
         ];
 
+        $users = $this->model->getAllUsers($filters);
         $totalCount = $this->model->countUsers($filters);
+        $stats = $this->model->getUserStats();
         $perPage = $this->model->getPerPage();
         $totalPages = max(1, (int)ceil($totalCount / $perPage));
-        $filters['page'] = min($filters['page'], $totalPages);
+        $currentPageNum = max(1, min($filters['page'], $totalPages));
 
-        $users = $this->model->getAllUsers($filters);
-        $stats = $this->model->getUserStats();
-        $currentPageNumber = $filters['page'];
-
-        $success = $_SESSION['flash_success'] ?? null;
-        $error = $_SESSION['flash_error'] ?? null;
-        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
-
-        $pageTitle = 'Admin User Management';
-        $currentPage = 'admin.users';
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError = $_SESSION['flash_error'] ?? null;
+        $createErrors = $_SESSION['create_errors'] ?? [];
+        $createOld = $_SESSION['create_old'] ?? [];
+        $showCreateModal = (bool)($_SESSION['show_create_modal'] ?? false);
+        unset(
+            $_SESSION['flash_success'],
+            $_SESSION['flash_error'],
+            $_SESSION['create_errors'],
+            $_SESSION['create_old'],
+            $_SESSION['show_create_modal']
+        );
 
         require APP_ROOT . '/views/admin/users/index.php';
     }
@@ -47,291 +50,169 @@ class UserController
     public function create(): void
     {
         Middleware::requireAdmin();
-
-        $errors = $_SESSION['form_errors'] ?? [];
-        $old = $_SESSION['form_old'] ?? [
-            'full_name' => '',
-            'email' => '',
-            'role' => 'student',
-            'student_code' => '',
-            'is_active' => 1,
-        ];
-        unset($_SESSION['form_errors'], $_SESSION['form_old']);
-
-        $pageTitle = 'Add New User';
-        $currentPage = 'admin.users';
-
-        require APP_ROOT . '/views/admin/users/create.php';
+        $_SESSION['show_create_modal'] = true;
+        header('Location: ' . APP_URL . '/index.php?page=admin_users');
+        exit;
     }
 
     public function store(): void
     {
         Middleware::requireAdmin();
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $_SESSION['flash_error'] = 'Invalid request method.';
-            $this->redirectToCreate();
+            $this->redirectList();
         }
 
-        $data = $this->readUserForm();
-        $errors = $this->validateCreate($data);
+        $data = $this->collectPayload($_POST);
+        $errors = $this->validate($data, null, true);
 
-        if (!empty($errors)) {
-            $_SESSION['form_errors'] = $errors;
-            $_SESSION['form_old'] = $data;
-            $this->redirectToCreate();
+        if ($errors) {
+            $_SESSION['create_errors'] = $errors;
+            $_SESSION['create_old'] = $data;
+            $_SESSION['show_create_modal'] = true;
+            $this->redirectList();
         }
 
         $data['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        $ok = $this->model->createUser($data);
 
-        try {
-            $created = $this->model->createUser($data);
-        } catch (PDOException $e) {
-            $created = false;
-            $_SESSION['flash_error'] = 'Cannot create user because the email may already exist.';
-        }
-
-        if ($created) {
-            $_SESSION['flash_success'] = 'User created successfully.';
-        } elseif (empty($_SESSION['flash_error'])) {
-            $_SESSION['flash_error'] = 'Failed to create user. Please try again.';
-        }
-
-        $this->redirectToList();
+        $_SESSION['flash_' . ($ok ? 'success' : 'error')] = $ok
+            ? 'User created successfully.'
+            : 'Unable to create user.';
+        $this->redirectList();
     }
 
     public function edit(): void
     {
         Middleware::requireAdmin();
-
-        $id = $this->getRequestedId();
+        $id = (int)($_GET['id'] ?? 0);
         $user = $this->model->getUserById($id);
-
         if (!$user) {
             $_SESSION['flash_error'] = 'User not found.';
-            $this->redirectToList();
+            $this->redirectList();
         }
 
-        $errors = $_SESSION['form_errors'] ?? [];
-        $old = $_SESSION['form_old'] ?? $user;
-        unset($_SESSION['form_errors'], $_SESSION['form_old']);
+        $errors = [];
+        $old = $user;
 
-        $pageTitle = 'Edit User';
-        $currentPage = 'admin.users';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = array_merge($old, $this->collectPayload($_POST));
+            $errors = $this->validate($old, $id, false);
+            if (!$errors) {
+                $payload = [
+                    'full_name' => $old['full_name'],
+                    'email' => $old['email'],
+                    'role' => $old['role'],
+                    'student_code' => $old['student_code'],
+                    'is_active' => $old['is_active'],
+                ];
+                if (!empty($old['password'])) {
+                    $payload['password_hash'] = password_hash($old['password'], PASSWORD_DEFAULT);
+                }
+
+                $ok = $this->model->updateUser($id, $payload);
+                $_SESSION['flash_' . ($ok ? 'success' : 'error')] = $ok
+                    ? 'User updated successfully.'
+                    : 'Unable to update user.';
+                $this->redirectList();
+            }
+        }
 
         require APP_ROOT . '/views/admin/users/edit.php';
     }
 
     public function update(): void
     {
-        Middleware::requireAdmin();
-
-        $id = $this->getRequestedId();
-        $user = $this->model->getUserById($id);
-
-        if (!$user) {
-            $_SESSION['flash_error'] = 'User not found.';
-            $this->redirectToList();
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $_SESSION['flash_error'] = 'Invalid request method.';
-            $this->redirectToEdit($id);
-        }
-
-        $data = $this->readUserForm(false);
-        $errors = $this->validateUpdate($data, $id);
-
-        if ($this->isCurrentUser($id) && (int)$data['is_active'] === 0) {
-            $errors['is_active'] = 'You cannot deactivate your own account.';
-        }
-
-        if (!empty($errors)) {
-            $_SESSION['form_errors'] = $errors;
-            $_SESSION['form_old'] = $data;
-            $this->redirectToEdit($id);
-        }
-
-        $updateData = [
-            'full_name' => $data['full_name'],
-            'email' => $data['email'],
-            'role' => $data['role'],
-            'student_code' => $data['student_code'],
-            'is_active' => $data['is_active'],
-        ];
-
-        if ($data['password'] !== '') {
-            $updateData['password_hash'] = password_hash($data['password'], PASSWORD_DEFAULT);
-        }
-
-        try {
-            $updated = $this->model->updateUser($id, $updateData);
-        } catch (PDOException $e) {
-            $updated = false;
-            $_SESSION['flash_error'] = 'Cannot update user because the email may already belong to another user.';
-        }
-
-        if ($updated) {
-            $_SESSION['flash_success'] = 'User updated successfully.';
-        } elseif (empty($_SESSION['flash_error'])) {
-            $_SESSION['flash_error'] = 'Failed to update user. Please try again.';
-        }
-
-        $this->redirectToList();
+        // Kept for backward compatibility with old route.
+        $this->edit();
     }
 
     public function deactivate(): void
     {
         Middleware::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['flash_error'] = 'Invalid request method.';
+            $this->redirectList();
+        }
 
-        $id = $this->getRequestedId();
-
-        if ($this->isCurrentUser($id)) {
+        $id = (int)($_GET['id'] ?? 0);
+        $sessionUser = Middleware::user();
+        if ($id > 0 && $id === (int)($sessionUser['id'] ?? 0)) {
             $_SESSION['flash_error'] = 'You cannot deactivate your own account.';
-            $this->redirectToList();
+            $this->redirectList();
         }
 
-        $user = $this->model->getUserById($id);
-        if (!$user) {
-            $_SESSION['flash_error'] = 'User not found.';
-            $this->redirectToList();
-        }
-
-        if ($this->model->setActiveStatus($id, 0)) {
-            $_SESSION['flash_success'] = 'User deactivated successfully.';
-        } else {
-            $_SESSION['flash_error'] = 'Failed to deactivate user.';
-        }
-
-        $this->redirectToList();
+        $ok = $this->model->setActiveStatus($id, 0);
+        $_SESSION['flash_' . ($ok ? 'success' : 'error')] = $ok
+            ? 'User deactivated.'
+            : 'Unable to deactivate user.';
+        $this->redirectList();
     }
 
     public function activate(): void
     {
         Middleware::requireAdmin();
-
-        $id = $this->getRequestedId();
-        $user = $this->model->getUserById($id);
-
-        if (!$user) {
-            $_SESSION['flash_error'] = 'User not found.';
-            $this->redirectToList();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['flash_error'] = 'Invalid request method.';
+            $this->redirectList();
         }
 
-        if ($this->model->setActiveStatus($id, 1)) {
-            $_SESSION['flash_success'] = 'User activated successfully.';
-        } else {
-            $_SESSION['flash_error'] = 'Failed to activate user.';
-        }
-
-        $this->redirectToList();
+        $id = (int)($_GET['id'] ?? 0);
+        $ok = $this->model->setActiveStatus($id, 1);
+        $_SESSION['flash_' . ($ok ? 'success' : 'error')] = $ok
+            ? 'User activated.'
+            : 'Unable to activate user.';
+        $this->redirectList();
     }
 
-    private function readUserForm(bool $passwordRequired = true): array
+    private function collectPayload(array $source): array
     {
-        $role = $_POST['role'] ?? 'student';
-        $studentCode = trim($_POST['student_code'] ?? '');
-
         return [
-            'full_name' => trim($_POST['full_name'] ?? ''),
-            'email' => trim($_POST['email'] ?? ''),
-            'password' => $passwordRequired ? ($_POST['password'] ?? '') : trim($_POST['password'] ?? ''),
-            'role' => $role,
-            'student_code' => $role === 'student' && $studentCode !== '' ? $studentCode : null,
-            'is_active' => (isset($_POST['is_active']) && (string)$_POST['is_active'] === '0') ? 0 : 1,
+            'full_name' => trim((string)($source['full_name'] ?? '')),
+            'email' => trim((string)($source['email'] ?? '')),
+            'password' => (string)($source['password'] ?? ''),
+            'role' => (string)($source['role'] ?? 'student'),
+            'student_code' => trim((string)($source['student_code'] ?? '')),
+            'is_active' => (int)($source['is_active'] ?? 1),
         ];
     }
 
-    private function validateCreate(array $data): array
-    {
-        $errors = $this->validateShared($data);
-
-        if ($data['password'] === '') {
-            $errors['password'] = 'Password is required.';
-        } elseif (strlen($data['password']) < 6) {
-            $errors['password'] = 'Password must be at least 6 characters.';
-        }
-
-        if (!isset($errors['email']) && $this->model->emailExists($data['email'])) {
-            $errors['email'] = 'Email already exists.';
-        }
-
-        return $errors;
-    }
-
-    private function validateUpdate(array $data, int $excludeId): array
-    {
-        $errors = $this->validateShared($data);
-
-        if ($data['password'] !== '' && strlen($data['password']) < 6) {
-            $errors['password'] = 'New password must be at least 6 characters.';
-        }
-
-        if (!isset($errors['email']) && $this->model->emailExists($data['email'], $excludeId)) {
-            $errors['email'] = 'Email already belongs to another user.';
-        }
-
-        return $errors;
-    }
-
-    private function validateShared(array $data): array
+    private function validate(array $data, ?int $excludeId, bool $requirePassword): array
     {
         $errors = [];
 
         if ($data['full_name'] === '') {
             $errors['full_name'] = 'Full name is required.';
-        } elseif (mb_strlen($data['full_name']) > 100) {
-            $errors['full_name'] = 'Full name must be 100 characters or fewer.';
         }
 
         if ($data['email'] === '') {
             $errors['email'] = 'Email is required.';
         } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'Email format is invalid.';
-        } elseif (mb_strlen($data['email']) > 100) {
-            $errors['email'] = 'Email must be 100 characters or fewer.';
+            $errors['email'] = 'Email is invalid.';
+        } elseif ($this->model->emailExists($data['email'], $excludeId)) {
+            $errors['email'] = 'Email already exists.';
         }
 
-        if (!in_array($data['role'], $this->validRoles, true)) {
-            $errors['role'] = 'Role must be admin, teacher, or student.';
+        if (!in_array($data['role'], ['admin', 'teacher', 'student'], true)) {
+            $errors['role'] = 'Invalid role.';
         }
 
-        if (!in_array((int)$data['is_active'], [0, 1], true)) {
-            $errors['is_active'] = 'Status is invalid.';
+        if ($requirePassword && $data['password'] === '') {
+            $errors['password'] = 'Password is required.';
+        } elseif ($data['password'] !== '' && strlen($data['password']) < 6) {
+            $errors['password'] = 'Password must be at least 6 characters.';
         }
 
-        if ($data['student_code'] !== null && mb_strlen($data['student_code']) > 20) {
-            $errors['student_code'] = 'Student code must be 20 characters or fewer.';
+        if ($data['role'] === 'student' && $data['student_code'] === '') {
+            $errors['student_code'] = 'Student code is required for student role.';
         }
 
         return $errors;
     }
 
-    private function getRequestedId(): int
-    {
-        return max(0, (int)($_GET['id'] ?? 0));
-    }
-
-    private function isCurrentUser(int $id): bool
-    {
-        return $id > 0 && isset($_SESSION['user_id']) && $id === (int)$_SESSION['user_id'];
-    }
-
-    private function redirectToList(): void
+    private function redirectList(): void
     {
         header('Location: ' . APP_URL . '/index.php?page=admin_users');
-        exit;
-    }
-
-    private function redirectToCreate(): void
-    {
-        header('Location: ' . APP_URL . '/index.php?page=admin_users_create');
-        exit;
-    }
-
-    private function redirectToEdit(int $id): void
-    {
-        header('Location: ' . APP_URL . '/index.php?page=admin_users_edit&id=' . $id);
         exit;
     }
 }

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // controllers/StudentController.php
 // Xử lý toàn bộ chức năng của sinh viên
@@ -340,7 +340,7 @@ class StudentController
         $stmt = $this->db->prepare(
             'SELECT c.id, c.course_code, c.course_name, c.semester
              FROM courses c
-             JOIN course_enrollments ce ON ce.course_id = c.id
+             JOIN enrollments ce ON ce.course_id = c.id
              WHERE ce.user_id = ? AND ce.role = "student" AND c.is_active = 1
              ORDER BY c.course_name ASC'
         );

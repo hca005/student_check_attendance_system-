@@ -103,13 +103,13 @@ require_once APP_ROOT . '/views/layouts/header.php';
                 <a href="<?= APP_URL ?>/index.php?page=admin_users_create" class="btn btn-primary btn-sm">
                     <i class="bi bi-person-plus me-1"></i>Tạo tài khoản
                 </a>
-                <a href="<?= APP_URL ?>/admin/courses.php?action=create" class="btn btn-warning btn-sm text-dark">
+                <a href="<?= APP_URL ?>/index.php?page=admin_course_create" class="btn btn-warning btn-sm text-dark">
                     <i class="bi bi-plus-circle me-1"></i>Tạo học phần
                 </a>
-                <a href="<?= APP_URL ?>/admin/enrollments.php" class="btn btn-info btn-sm text-dark">
+                <a href="<?= APP_URL ?>/index.php?page=admin_enrollments" class="btn btn-info btn-sm text-dark">
                     <i class="bi bi-person-fill-add me-1"></i>Gán người vào lớp
                 </a>
-                <a href="<?= APP_URL ?>/admin/alerts.php" class="btn btn-danger btn-sm">
+                <a href="<?= APP_URL ?>/index.php?page=admin_alerts" class="btn btn-danger btn-sm">
                     <i class="bi bi-bell me-1"></i>Xem cảnh báo (<?= $openAlerts ?>)
                 </a>
             </div>
@@ -152,7 +152,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
                     </td>
                     <td class="text-muted small"><?= date('d/m/Y H:i', strtotime($alert['created_at'])) ?></td>
                     <td>
-                        <a href="<?= APP_URL ?>/admin/alerts.php" class="btn btn-sm btn-outline-secondary">
+                        <a href="<?= APP_URL ?>/index.php?page=admin_alerts" class="btn btn-sm btn-outline-secondary">
                             Xem
                         </a>
                     </td>

@@ -10,12 +10,16 @@ $db = Database::getInstance()->getConnection();
 $teacher_id = $_SESSION['user_id'];
 
 $stmt = $db->prepare("
-    SELECT qs.*, cs.session_date, cs.title as session_title, c.course_name,
-           COUNT(qq.id) as question_count
+    SELECT qs.*,
+           cs.session_date,
+           cs.title as session_title,
+           c.course_name,
+           c.course_code,
+           COUNT(DISTINCT sub.id) as submission_count
     FROM quiz_sessions qs
     JOIN class_sessions cs ON qs.session_id = cs.id
     JOIN courses c ON cs.course_id = c.id
-    LEFT JOIN quiz_questions qq ON qq.quiz_id = qs.id
+    LEFT JOIN quiz_submissions sub ON sub.quiz_id = qs.id
     WHERE cs.teacher_id = ?
     GROUP BY qs.id
     ORDER BY cs.session_date DESC

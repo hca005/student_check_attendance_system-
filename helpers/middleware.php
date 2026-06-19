@@ -62,6 +62,22 @@ class Middleware
         self::requireRole('student');
     }
 
+    // Compatibility aliases used by some legacy pages.
+    public static function admin(): void
+    {
+        self::requireAdmin();
+    }
+
+    public static function teacher(): void
+    {
+        self::requireTeacher();
+    }
+
+    public static function student(): void
+    {
+        self::requireStudent();
+    }
+
     // ── Chặn user đã login vào trang guest (login page) ───
     public static function guest(): void
     {

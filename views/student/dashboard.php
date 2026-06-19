@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 Middleware::requireStudent();
 $pageTitle   = 'My Overview';
 $currentPage = 'student.dashboard';
@@ -7,7 +7,7 @@ $db     = Database::getInstance();
 $userId = Middleware::user()['id'];
 
 $myCourses = $db->query(
-  "SELECT c.* FROM courses c JOIN course_enrollments ce ON ce.course_id=c.id
+  "SELECT c.* FROM courses c JOIN enrollments ce ON ce.course_id=c.id
    WHERE ce.user_id=? AND ce.role='student' AND c.is_active=1", [$userId]
 )->fetchAll();
 

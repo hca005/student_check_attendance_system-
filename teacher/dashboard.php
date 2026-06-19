@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 Middleware::requireTeacher();
 
 $pageTitle   = 'Dashboard – Giảng viên';
@@ -10,7 +10,7 @@ $userId  = Middleware::user()['id'];
 // Courses I teach
 $myCourses = $db->query(
     "SELECT c.* FROM courses c
-     JOIN course_enrollments ce ON ce.course_id = c.id
+     JOIN enrollments ce ON ce.course_id = c.id
      WHERE ce.user_id = ? AND ce.role = 'teacher' AND c.is_active = 1",
     [$userId]
 )->fetchAll();

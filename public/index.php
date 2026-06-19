@@ -1,11 +1,17 @@
 <?php
-/**
- * public/index.php
- * Main entry point and query-string router.
- */
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 require_once dirname(__DIR__) . '/config/config.php';
+require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/helpers/middleware.php';
+require_once dirname(__DIR__) . '/controllers/user_controller.php';
+require_once dirname(__DIR__) . '/controllers/course_controller.php';
+require_once dirname(__DIR__) . '/controllers/enrollment_controller.php';
+require_once dirname(__DIR__) . '/controllers/session_controller.php';
+require_once dirname(__DIR__) . '/controllers/admin_monitoring_controller.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -13,74 +19,109 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $page = $_GET['page'] ?? null;
 
-$adminUserRoutes = [
-    'admin_users',
-    'admin_users_create',
-    'admin_users_store',
-    'admin_users_edit',
-    'admin_users_update',
-    'admin_users_deactivate',
-    'admin_users_activate',
-];
+$userController = new UserController();
+$courseController = new CourseController();
+$enrollmentController = new EnrollmentController();
+$sessionController = new SessionController();
+$monitorController = new AdminMonitoringController();
 
-if (in_array($page, $adminUserRoutes, true)) {
-    require_once dirname(__DIR__) . '/controllers/user_controller.php';
+switch ($page) {
+    case 'admin_dashboard':
+        Middleware::requireAdmin();
+        require APP_ROOT . '/views/admin/dashboard.php';
+        exit;
 
-    $userController = new UserController();
+    case 'admin_users':
+        $userController->index();
+        exit;
+    case 'admin_users_create':
+        $userController->create();
+        exit;
+    case 'admin_users_store':
+        $userController->store();
+        exit;
+    case 'admin_users_edit':
+        $userController->edit();
+        exit;
+    case 'admin_users_update':
+        $userController->update();
+        exit;
+    case 'admin_users_deactivate':
+        $userController->deactivate();
+        exit;
+    case 'admin_users_activate':
+        $userController->activate();
+        exit;
 
-    switch ($page) {
-        case 'admin_users':
-            $userController->index();
-            break;
+    case 'admin_courses':
+        $courseController->index();
+        exit;
+    case 'admin_course_create':
+        $courseController->create();
+        exit;
+    case 'admin_course_edit':
+        $courseController->edit();
+        exit;
+    case 'admin_course_delete':
+        $courseController->delete();
+        exit;
 
-        case 'admin_users_create':
-            $userController->create();
-            break;
+    case 'admin_enrollments':
+        $enrollmentController->index();
+        exit;
+    case 'admin_enrollment_create':
+        $enrollmentController->create();
+        exit;
+    case 'admin_enrollment_edit':
+        $enrollmentController->edit();
+        exit;
+    case 'admin_enrollment_delete':
+        $enrollmentController->delete();
+        exit;
 
-        case 'admin_users_store':
-            $userController->store();
-            break;
+    case 'admin_sessions':
+        $sessionController->index();
+        exit;
+    case 'admin_session_create':
+        $sessionController->create();
+        exit;
+    case 'admin_session_edit':
+        $sessionController->edit();
+        exit;
+    case 'admin_session_delete':
+        $sessionController->delete();
+        exit;
 
-        case 'admin_users_edit':
-            $userController->edit();
-            break;
-
-        case 'admin_users_update':
-            $userController->update();
-            break;
-
-        case 'admin_users_deactivate':
-            $userController->deactivate();
-            break;
-
-        case 'admin_users_activate':
-            $userController->activate();
-            break;
-    }
-
-    exit;
+    case 'admin_engagement_scores':
+        $monitorController->engagementScores();
+        exit;
+    case 'admin_alerts':
+        $monitorController->alerts();
+        exit;
+    case 'admin_alert_detail':
+        $monitorController->alertDetail();
+        exit;
+    case 'admin_alert_resolve':
+        $monitorController->resolveAlert();
+        exit;
+    case 'admin_alert_generate':
+        $monitorController->generateAlerts();
+        exit;
+    case 'admin_reports':
+        Middleware::requireAdmin();
+        require APP_ROOT . '/views/admin/reports.php';
+        exit;
+    case 'profile':
+        require APP_ROOT . '/views/profile.php';
+        exit;
+    case 'settings':
+        require APP_ROOT . '/views/settings.php';
+        exit;
 }
 
 if (!empty($_SESSION['user_id'])) {
-    switch ($_SESSION['role'] ?? '') {
-        case 'admin':
-            header('Location: ' . APP_URL . '/admin/dashboard.php');
-            break;
-
-        case 'teacher':
-            header('Location: ' . APP_URL . '/teacher/dashboard.php');
-            break;
-
-        case 'student':
-            header('Location: ' . APP_URL . '/student/dashboard.php');
-            break;
-
-        default:
-            header('Location: ' . APP_URL . '/login.php');
-            break;
-    }
-} else {
-    header('Location: ' . APP_URL . '/login.php');
+    Middleware::redirectByRole($_SESSION['role'] ?? '');
 }
 
+header('Location: ' . APP_URL . '/login.php');
 exit;

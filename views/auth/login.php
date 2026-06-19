@@ -1,312 +1,410 @@
+<?php
+$safeError = isset($error) ? (string)$error : '';
+$safeOldEmail = isset($oldEmail) ? (string)$oldEmail : '';
+?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng nhập – <?= APP_NAME ?></title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;height:100vh;display:flex;overflow:hidden;background:#f1f5f9}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Attendance Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #0f172a;
+    }
+    .login-shell {
+      width: 100%;
+      max-width: 1000px;
+      min-height: 540px;
+      border-radius: 14px;
+      border: 1px solid #dbe3f0;
+      background: #ffffff;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .login-left {
+      background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-right: 1px solid #dbe3f0;
+    }
+    .left-brand,
+    .left-copy,
+    .left-media,
+    .left-footer { position: relative; z-index: 1; }
+    .left-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .left-brand img {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      display: block;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .left-brand .b-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .left-brand .b-line1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -1px;
+    }
+    .left-brand .b-line2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #2563eb;
+      letter-spacing: -1px;
+      margin-top: -6px;
+    }
+    .left-brand .b-sub {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      margin-top: 6px;
+      padding-left: 2px;
+    }
+    .left-copy h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      line-height: 1.4;
+      color: #1e293b;
+      margin-bottom: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .left-copy p {
+      color: rgba(255,255,255,0.86);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      max-width: 560px;
+    }
+    .left-media {
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 16px 28px rgba(7, 17, 35, 0.08);
+      min-height: 200px;
+    }
+    .left-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .left-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      color: #475569;
+      font-size: 12px;
+      font-style: italic;
+    }
+    .avatar-stack {
+      display: flex;
+      align-items: center;
+    }
+    .avatar-stack span {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 2px solid #dbeafe;
+      margin-left: -6px;
+    }
+    .avatar-stack span:first-child { margin-left: 0; background: #93c5fd; }
+    .avatar-stack span:nth-child(2) { background: #f9a8d4; }
+    .avatar-stack span:nth-child(3) { background: #fdba74; }
 
-/* ── LEFT PANEL ── */
-.login-left{
-  width:42%;flex-shrink:0;
-  background:linear-gradient(160deg,#1D4ED8 0%,#2563EB 55%,#3B82F6 100%);
-  display:flex;flex-direction:column;padding:36px 40px;
-  position:relative;overflow:hidden;color:#fff;
-}
-.left-brand{display:flex;align-items:center;gap:12px;margin-bottom:40px}
-.left-brand img{width:42px;height:42px;border-radius:10px}
-.left-brand span{font-size:16px;font-weight:700;letter-spacing:.01em}
-.left-headline{font-size:28px;font-weight:800;line-height:1.25;margin-bottom:14px}
-.left-sub{font-size:14px;color:rgba(255,255,255,.8);line-height:1.65;max-width:340px}
-.left-image{
-  flex:1;display:flex;align-items:flex-end;justify-content:center;
-  margin:30px -40px 0;
-}
-.left-image img{width:100%;object-fit:cover;border-radius:12px 12px 0 0;max-height:280px}
-/* Fallback classroom illustration */
-.classroom-placeholder{
-  width:100%;background:rgba(255,255,255,.1);border-radius:14px;
-  height:230px;display:flex;align-items:center;justify-content:center;
-  font-size:60px;
-}
-.left-footer{
-  margin-top:20px;display:flex;align-items:center;gap:10px;
-  font-size:12px;color:rgba(255,255,255,.75);
-}
-.avatar-stack{display:flex}
-.avatar-stack span{
-  width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.6);
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;color:#fff;margin-left:-8px;first-child{margin-left:0}
-}
-.avatar-stack span:nth-child(1){background:#F59E0B;margin-left:0}
-.avatar-stack span:nth-child(2){background:#10B981}
-.avatar-stack span:nth-child(3){background:#EF4444}
-
-/* ── RIGHT PANEL ── */
-.login-right{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  padding:40px;overflow-y:auto;
-}
-.login-box{width:100%;max-width:400px}
-.login-box h1{font-size:26px;font-weight:800;color:#0F172A;margin-bottom:6px}
-.login-box .subtitle{font-size:14px;color:#64748B;margin-bottom:32px}
-
-.form-group{margin-bottom:18px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-.input-row{position:relative}
-.input-row .icon{
-  position:absolute;left:13px;top:50%;transform:translateY(-50%);
-  color:#9CA3AF;pointer-events:none;font-size:16px;
-}
-.input-row input{
-  width:100%;padding:11px 42px 11px 40px;
-  border:1.5px solid #E2E8F0;border-radius:10px;
-  font-size:14px;font-family:inherit;background:#fff;color:#0F172A;
-  outline:none;transition:border-color .18s,box-shadow .18s;
-}
-.input-row input:focus{border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.input-row input.error{border-color:#EF4444}
-.input-row .toggle-pw{
-  position:absolute;right:13px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:18px;padding:2px;
-}
-.pw-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.pw-label-row label{margin-bottom:0}
-.forgot-link{font-size:12px;color:#2563EB;text-decoration:none;font-weight:600}
-.forgot-link:hover{text-decoration:underline}
-.err-text{color:#EF4444;font-size:12px;margin-top:4px;display:none}
-.err-text.show{display:block}
-
-.remember-row{display:flex;align-items:center;gap:8px;margin-bottom:24px;font-size:13px;color:#374151}
-.remember-row input[type=checkbox]{width:16px;height:16px;accent-color:#2563EB;cursor:pointer}
-
-.btn-signin{
-  width:100%;padding:13px;border-radius:10px;border:none;
-  background:#2563EB;color:#fff;font-size:15px;font-weight:700;
-  cursor:pointer;transition:background .18s;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn-signin:hover{background:#1D4ED8}
-.btn-signin:disabled{background:#93C5FD;cursor:not-allowed}
-.spinner{
-  width:18px;height:18px;border:2px solid rgba(255,255,255,.4);
-  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.divider{text-align:center;color:#CBD5E1;font-size:12px;margin:22px 0;position:relative}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:44%;height:1px;background:#E2E8F0}
-.divider::before{left:0}.divider::after{right:0}
-
-.demo-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px}
-.demo-box p{font-size:12px;color:#64748B;margin-bottom:8px;font-weight:600}
-.demo-accounts{display:flex;flex-direction:column;gap:6px}
-.demo-item{
-  display:flex;align-items:center;justify-content:space-between;
-  background:#fff;border:1px solid #E2E8F0;border-radius:7px;
-  padding:7px 12px;cursor:pointer;transition:border-color .15s;
-}
-.demo-item:hover{border-color:#2563EB;background:#EFF6FF}
-.demo-item-left{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#374151}
-.demo-badge{
-  padding:2px 7px;border-radius:20px;font-size:11px;font-weight:700;
-}
-.badge-admin{background:#FEE2E2;color:#991B1B}
-.badge-teacher{background:#EFF6FF;color:#1E40AF}
-.badge-student{background:#D1FAE5;color:#065F46}
-.demo-pass{font-size:11px;color:#9CA3AF}
-
-.login-trouble{text-align:center;margin-top:22px;font-size:13px;color:#64748B}
-.login-trouble a{color:#2563EB;font-weight:600;text-decoration:none}
-.login-trouble a:hover{text-decoration:underline}
-
-.server-error{
-  background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;
-  padding:12px 16px;color:#991B1B;font-size:13px;
-  display:flex;align-items:center;gap:10px;margin-bottom:20px;
-}
-
-/* Responsive */
-@media(max-width:768px){
-  .login-left{display:none}
-  .login-right{padding:28px 20px}
-}
-</style>
+    .login-right {
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .login-right h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: 0;
+    }
+    .login-right p.sub {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .error-box {
+      margin-bottom: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+      font-size: 13px;
+    }
+    .field { margin-bottom: 16px; }
+    .field .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+    }
+    .forgot-link {
+      font-size: 12px;
+      font-weight: 700;
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 11px;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      width: 17px;
+      height: 17px;
+      pointer-events: none;
+    }
+    .input-wrap input {
+      width: 100%;
+      border: 1px solid #d7e1ee;
+      border-radius: 9px;
+      height: 45px;
+      padding: 0 38px 0 36px;
+      font-size: 14px;
+      background: #ffffff;
+      color: #0f172a;
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    .input-wrap input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    .toggle-pass {
+      border: none;
+      background: transparent;
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .row-check {
+      margin: 4px 0 18px;
+      color: #64748b;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .row-check input { accent-color: #2563eb; }
+    .btn-login {
+      width: 100%;
+      height: 46px;
+      border-radius: 8px;
+      border: 1px solid #1d4ed8;
+      background: #1d4ed8;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background .15s ease;
+      font-family: inherit;
+    }
+    .btn-login:hover { background: #1b45bf; }
+    .help-text {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+    .help-text a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .meta-links {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 11px;
+    }
+    .meta-links a {
+      text-decoration: none;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .meta-links a:hover { color: #64748b; }
+    @media (max-width: 1024px) {
+      .login-shell { grid-template-columns: 1fr; min-height: auto; }
+      .login-left { min-height: 420px; }
+      .left-copy h2 { font-size: 20px; }
+    }
+    @media (max-width: 720px) {
+      body { padding: 12px; }
+      .login-left { display: none; }
+      .login-right { padding: 32px 20px; }
+      .login-right h1 { font-size: 30px; }
+    }
+  </style>
 </head>
 <body>
-
-<!-- LEFT PANEL -->
-<div class="login-left">
-  <div class="left-brand">
-    <img src="<?= APP_URL ?>/assets/images/logo.svg" alt="Logo">
-    <span>Attendance Tracker</span>
-  </div>
-
-  <div class="left-headline">Empowering academic excellence through engagement.</div>
-  <div class="left-sub">Track attendance, quizzes, interaction logs, engagement scores, and student alerts in one academic management system.</div>
-
-  <div class="left-image">
-    <div class="classroom-placeholder">🎓</div>
-  </div>
-
-  <div class="left-footer">
-    <div class="avatar-stack">
-      <span>JC</span><span>AI</span><span>MK</span>
-    </div>
-    <span>Trusted by over 500 academic institutions worldwide.</span>
-  </div>
-</div>
-
-<!-- RIGHT PANEL -->
-<div class="login-right">
-  <div class="login-box">
-
-    <h1>Welcome Back</h1>
-    <p class="subtitle">Sign in with your institutional account to access the classroom management dashboard.</p>
-
-    <?php if (!empty($error)): ?>
-    <div class="server-error">
-      <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <?= htmlspecialchars($error) ?>
-    </div>
-    <?php endif; ?>
-
-    <form id="loginForm" method="POST" novalidate>
-
-      <!-- Email -->
-      <div class="form-group">
-        <label for="email">Institutional Email</label>
-        <div class="input-row">
-          <svg class="icon" width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 7l10 7 10-7" stroke="currentColor" stroke-width="2"/></svg>
-          <input type="email" id="email" name="email" placeholder="e.g. admin@ischool.vn"
-                 value="<?= htmlspecialchars($oldEmail ?? '') ?>" autocomplete="email">
+  <div class="login-shell">
+    <section class="login-left">
+      <div class="left-brand">
+        <img src="<?= APP_URL ?>/assets/images/logo.svg?v=20260619" alt="Attendance Tracker logo">
+        <div class="b-text">
+          <div class="b-line1">Attendance</div>
+          <div class="b-line2">Tracker</div>
+          <div class="b-sub">Academic Management</div>
         </div>
-        <div class="err-text" id="emailErr">Vui lòng nhập email hợp lệ.</div>
       </div>
 
-      <!-- Password -->
-      <div class="form-group">
-        <div class="pw-label-row">
-          <label for="password">Password</label>
-          <a href="#" class="forgot-link">FORGOT?</a>
-        </div>
-        <div class="input-row">
-          <svg class="icon" width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/></svg>
-          <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password">
-          <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">
-            <svg id="eyeOpen" width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
-            <svg id="eyeClose" width="18" height="18" fill="none" viewBox="0 0 24 24" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/></svg>
-          </button>
-        </div>
-        <div class="err-text" id="pwErr">Vui lòng nhập mật khẩu.</div>
+      <div class="left-copy">
+        <h2>Empowering academic excellence through engagement.</h2>
       </div>
 
-      <!-- Remember -->
-      <div class="remember-row">
-        <input type="checkbox" id="remember" name="remember">
-        <label for="remember">Keep me logged in for 30 days</label>
+      <div class="left-media">
+        <img
+          src="<?= APP_URL ?>/assets/images/login-analytics.svg"
+          alt="Academic analytics overview"
+          onerror="this.src='<?= APP_URL ?>/assets/images/login-hero.svg';"
+        >
       </div>
 
-      <button type="submit" class="btn-signin" id="submitBtn">
-        <div class="spinner" id="spinner"></div>
-        <span id="btnText">Sign In →</span>
-      </button>
-    </form>
+      <div class="left-footer">
+        <div class="avatar-stack"><span></span><span></span><span></span></div>
+        <span>Trusted by over 500 academic institutions worldwide.</span>
+      </div>
+    </section>
 
-    <div class="divider">or use a demo account</div>
+    <section class="login-right">
+      <h1>Welcome Back</h1>
+      <p class="sub">Please enter your credentials to access the academic management dashboard.</p>
 
-    <!-- Demo accounts -->
-    <div class="demo-box">
-      <p>📋 Demo Accounts <span style="font-weight:400;color:#94A3B8">· password: <code>password</code></span></p>
-      <div class="demo-accounts">
-        <div class="demo-item" onclick="fillDemo('admin@ischool.vn')">
-          <div class="demo-item-left">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#991B1B" opacity=".2" stroke="#991B1B" stroke-width="2"/></svg>
-            <span class="demo-badge badge-admin">Admin</span>
-            admin@ischool.vn
+      <?php if ($safeError !== ''): ?>
+        <div class="error-box"><?= htmlspecialchars($safeError) ?></div>
+      <?php endif; ?>
+
+      <form method="post" action="<?= APP_URL ?>/login.php">
+        <div class="field">
+          <div class="label-row"><label for="email">Institutional Email</label></div>
+          <div class="input-wrap">
+            <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/>
+            </svg>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              value="<?= htmlspecialchars($safeOldEmail) ?>"
+              placeholder="e.g. professor@university.edu"
+              autocomplete="email"
+              required
+            >
           </div>
-          <span class="demo-pass">Click to fill</span>
         </div>
-        <div class="demo-item" onclick="fillDemo('an.teacher@ischool.vn')">
-          <div class="demo-item-left">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke="#1E40AF" stroke-width="2"/><line x1="8" y1="21" x2="16" y2="21" stroke="#1E40AF" stroke-width="2"/></svg>
-            <span class="demo-badge badge-teacher">Teacher</span>
-            an.teacher@ischool.vn
+
+        <div class="field">
+          <div class="label-row">
+            <label for="passwordInput">Password</label>
+            <a href="#" class="forgot-link">Forgot?</a>
           </div>
-          <span class="demo-pass">Click to fill</span>
-        </div>
-        <div class="demo-item" onclick="fillDemo('cuong@ischool.vn')">
-          <div class="demo-item-left">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" stroke="#065F46" stroke-width="2"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#065F46" stroke-width="2"/></svg>
-            <span class="demo-badge badge-student">Student</span>
-            cuong@ischool.vn
+          <div class="input-wrap">
+            <svg class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/>
+            </svg>
+            <input
+              id="passwordInput"
+              type="password"
+              name="password"
+              placeholder="********"
+              autocomplete="current-password"
+              required
+            >
+            <button type="button" class="toggle-pass" onclick="togglePassword()" aria-label="Toggle password visibility">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
           </div>
-          <span class="demo-pass">Click to fill</span>
         </div>
+
+        <label class="row-check">
+          <input type="checkbox" name="remember">
+          Keep me logged in for 30 days
+        </label>
+
+        <button type="submit" class="btn-login">Sign In to Dashboard</button>
+      </form>
+
+      <p class="help-text">Trouble logging in? <a href="#">Contact IT Support</a></p>
+
+      <div class="meta-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
       </div>
-    </div>
-
-    <div class="login-trouble">
-      Trouble logging in? <a href="#">Contact IT Support</a>
-    </div>
-
+    </section>
   </div>
-</div>
 
-<script>
-// ── Fill demo account ───────────────────────────────────
-function fillDemo(email) {
-  document.getElementById('email').value = email;
-  document.getElementById('password').value = 'password';
-  document.getElementById('email').classList.remove('error');
-  document.getElementById('password').classList.remove('error');
-}
-
-// ── Toggle password ─────────────────────────────────────
-document.getElementById('togglePw').addEventListener('click', function() {
-  const pw = document.getElementById('password');
-  const eyeO = document.getElementById('eyeOpen');
-  const eyeC = document.getElementById('eyeClose');
-  if (pw.type === 'password') {
-    pw.type = 'text'; eyeO.style.display = 'none'; eyeC.style.display = '';
-  } else {
-    pw.type = 'password'; eyeO.style.display = ''; eyeC.style.display = 'none';
-  }
-});
-
-// ── Frontend validation ─────────────────────────────────
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-  let ok = true;
-  const email = document.getElementById('email');
-  const pw    = document.getElementById('password');
-  const emailErr = document.getElementById('emailErr');
-  const pwErr    = document.getElementById('pwErr');
-
-  // reset
-  email.classList.remove('error'); emailErr.classList.remove('show');
-  pw.classList.remove('error');    pwErr.classList.remove('show');
-
-  if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-    email.classList.add('error'); emailErr.classList.add('show'); ok = false;
-  }
-  if (!pw.value) {
-    pw.classList.add('error'); pwErr.classList.add('show'); ok = false;
-  }
-
-  if (!ok) { e.preventDefault(); return; }
-
-  // Loading state
-  const btn  = document.getElementById('submitBtn');
-  const spin = document.getElementById('spinner');
-  const txt  = document.getElementById('btnText');
-  btn.disabled = true;
-  spin.style.display = '';
-  txt.textContent = 'Signing in...';
-});
-</script>
+  <script>
+    function togglePassword() {
+      const input = document.getElementById('passwordInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  </script>
 </body>
 </html>

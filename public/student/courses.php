@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * public/student/courses.php
  * Route: Trang "My Courses"
@@ -22,8 +22,8 @@ $courses = $db->query(
     "SELECT c.id, c.course_code, c.course_name, c.semester,
             u.full_name AS teacher_name
      FROM courses c
-     JOIN course_enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND ce.role = 'student'
-     LEFT JOIN course_enrollments ce2 ON ce2.course_id = c.id AND ce2.role = 'teacher'
+     JOIN enrollments ce ON ce.course_id = c.id AND ce.user_id = ? AND ce.role = 'student'
+     LEFT JOIN enrollments ce2 ON ce2.course_id = c.id AND ce2.role = 'teacher'
      LEFT JOIN users u ON u.id = ce2.user_id
      WHERE c.is_active = 1
      ORDER BY c.course_name ASC",

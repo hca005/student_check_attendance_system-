@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 Middleware::requireTeacher();
 $pageTitle   = 'Teacher Dashboard';
 $currentPage = 'teacher.dashboard';
@@ -7,7 +7,7 @@ $db     = Database::getInstance();
 $userId = Middleware::user()['id'];
 
 $myCourses = $db->query(
-  "SELECT c.* FROM courses c JOIN course_enrollments ce ON ce.course_id=c.id
+  "SELECT c.* FROM courses c JOIN enrollments ce ON ce.course_id=c.id
    WHERE ce.user_id=? AND ce.role='teacher' AND c.is_active=1", [$userId]
 )->fetchAll();
 
@@ -16,7 +16,7 @@ $in = implode(',', $courseIds);
 
 $totalSessions  = $db->query("SELECT COUNT(*) FROM class_sessions WHERE course_id IN ($in)")->fetchColumn();
 $activeSessions = $db->query("SELECT COUNT(*) FROM class_sessions WHERE course_id IN ($in) AND status='active'")->fetchColumn();
-$totalStudents  = $db->query("SELECT COUNT(DISTINCT user_id) FROM course_enrollments WHERE course_id IN ($in) AND role='student'")->fetchColumn();
+$totalStudents  = $db->query("SELECT COUNT(DISTINCT user_id) FROM enrollments WHERE course_id IN ($in) AND role='student'")->fetchColumn();
 $openAlerts     = $db->query("SELECT COUNT(*) FROM alert_logs WHERE course_id IN ($in) AND status='open'")->fetchColumn();
 
 $upcoming = $db->query(
@@ -124,7 +124,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
 <div style="font-weight:700;font-size:15px;margin-bottom:14px">My Courses</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
 <?php foreach ($myCourses as $c):
-  $stuCount = $db->query("SELECT COUNT(*) FROM course_enrollments WHERE course_id=? AND role='student'", [$c['id']])->fetchColumn();
+  $stuCount = $db->query("SELECT COUNT(*) FROM enrollments WHERE course_id=? AND role='student'", [$c['id']])->fetchColumn();
   $sesCount = $db->query("SELECT COUNT(*) FROM class_sessions WHERE course_id=?", [$c['id']])->fetchColumn();
 ?>
 <div class="card" style="padding:20px">

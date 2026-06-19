@@ -1,214 +1,166 @@
 <?php
+// ============================================================
+// models/user_model.php
+// Repository Pattern – toàn bộ truy vấn liên quan đến bảng users
+// ============================================================
 
 require_once __DIR__ . '/../config/database.php';
 
 class UserModel
 {
     private PDO $db;
-    private int $perPage = 10;
+    private int $perPage = 6;   // Số dòng / trang
 
     public function __construct()
     {
         $this->db = Database::getInstance()->getConnection();
     }
 
+    // ── GET ALL (phân trang + filter) ─────────────────────
     public function getAllUsers(array $filters = []): array
     {
-        [$whereSql, $params] = $this->buildWhere($filters);
-        $orderSql = $this->buildOrderBy($filters['sort'] ?? 'newest');
+        [$where, $params] = $this->buildWhere($filters);
+        $orderBy = $this->buildOrderBy($filters['sort'] ?? 'newest');
 
-        $page = max(1, (int)($filters['page'] ?? 1));
+        $page   = max(1, (int)($filters['page'] ?? 1));
         $offset = ($page - 1) * $this->perPage;
 
-        $sql = "
-            SELECT id, full_name, email, role, student_code, is_active, created_at, updated_at
-            FROM users
-            {$whereSql}
-            {$orderSql}
-            LIMIT :limit OFFSET :offset
-        ";
-
+        $sql  = "SELECT * FROM users $where $orderBy LIMIT {$this->perPage} OFFSET $offset";
         $stmt = $this->db->prepare($sql);
-        $this->bindWhereParams($stmt, $params);
-        $stmt->bindValue(':limit', $this->perPage, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // ── COUNT (cho pagination) ────────────────────────────
     public function countUsers(array $filters = []): int
     {
-        [$whereSql, $params] = $this->buildWhere($filters);
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users {$whereSql}");
-        $this->bindWhereParams($stmt, $params);
-        $stmt->execute();
-
+        [$where, $params] = $this->buildWhere($filters);
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users $where");
+        $stmt->execute($params);
         return (int)$stmt->fetchColumn();
     }
 
-    public function getUserById(int $id): ?array
-    {
-        $stmt = $this->db->prepare("
-            SELECT id, full_name, email, password_hash, role, student_code, is_active, created_at, updated_at
-            FROM users
-            WHERE id = :id
-        ");
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $user ?: null;
-    }
-
-    public function emailExists(string $email, ?int $excludeId = null): bool
-    {
-        $sql = 'SELECT COUNT(*) FROM users WHERE email = :email';
-
-        if ($excludeId !== null) {
-            $sql .= ' AND id <> :exclude_id';
-        }
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':email', $email);
-
-        if ($excludeId !== null) {
-            $stmt->bindValue(':exclude_id', $excludeId, PDO::PARAM_INT);
-        }
-
-        $stmt->execute();
-        return (int)$stmt->fetchColumn() > 0;
-    }
-
-    public function createUser(array $data): bool
-    {
-        $stmt = $this->db->prepare("
-            INSERT INTO users (full_name, email, password_hash, role, student_code, is_active)
-            VALUES (:full_name, :email, :password_hash, :role, :student_code, :is_active)
-        ");
-
-        return $stmt->execute([
-            ':full_name' => $data['full_name'],
-            ':email' => $data['email'],
-            ':password_hash' => $data['password_hash'],
-            ':role' => $data['role'],
-            ':student_code' => $data['student_code'],
-            ':is_active' => (int)$data['is_active'],
-        ]);
-    }
-
-    public function updateUser(int $id, array $data): bool
-    {
-        $sets = [
-            'full_name = :full_name',
-            'email = :email',
-            'role = :role',
-            'student_code = :student_code',
-            'is_active = :is_active',
-        ];
-
-        $params = [
-            ':id' => $id,
-            ':full_name' => $data['full_name'],
-            ':email' => $data['email'],
-            ':role' => $data['role'],
-            ':student_code' => $data['student_code'],
-            ':is_active' => (int)$data['is_active'],
-        ];
-
-        if (!empty($data['password_hash'])) {
-            $sets[] = 'password_hash = :password_hash';
-            $params[':password_hash'] = $data['password_hash'];
-        }
-
-        $sql = 'UPDATE users SET ' . implode(', ', $sets) . ' WHERE id = :id';
-        $stmt = $this->db->prepare($sql);
-
-        return $stmt->execute($params);
-    }
-
-    public function setActiveStatus(int $id, int $status): bool
-    {
-        $stmt = $this->db->prepare('UPDATE users SET is_active = :status WHERE id = :id');
-        $stmt->bindValue(':status', $status === 1 ? 1 : 0, PDO::PARAM_INT);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-
-        return $stmt->execute();
-    }
-
-    public function getUserStats(): array
-    {
-        $stmt = $this->db->query("
-            SELECT
-                COUNT(*) AS total,
-                COALESCE(SUM(is_active = 1), 0) AS active,
-                COALESCE(SUM(is_active = 0), 0) AS inactive,
-                COALESCE(SUM(role = 'admin'), 0) AS admins,
-                COALESCE(SUM(role = 'teacher'), 0) AS teachers,
-                COALESCE(SUM(role = 'student'), 0) AS students
-            FROM users
-        ");
-
-        $stats = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-
-        return [
-            'total' => (int)($stats['total'] ?? 0),
-            'active' => (int)($stats['active'] ?? 0),
-            'inactive' => (int)($stats['inactive'] ?? 0),
-            'admins' => (int)($stats['admins'] ?? 0),
-            'teachers' => (int)($stats['teachers'] ?? 0),
-            'students' => (int)($stats['students'] ?? 0),
-        ];
-    }
-
-    public function getPerPage(): int
-    {
-        return $this->perPage;
-    }
-
+    // ── WHERE builder – an toàn, dùng placeholder ─────────
     private function buildWhere(array $filters): array
     {
-        $conditions = [];
-        $params = [];
+        $conditions = ['1=1'];
+        $params     = [];
 
-        $search = trim((string)($filters['search'] ?? ''));
-        if ($search !== '') {
-            $conditions[] = '(full_name LIKE :search OR email LIKE :search OR student_code LIKE :search)';
-            $params[':search'] = '%' . $search . '%';
+        if (!empty($filters['search'])) {
+            $conditions[] = "(full_name LIKE ? OR email LIKE ? OR student_code LIKE ?)";
+            $s = '%' . $filters['search'] . '%';
+            $params[] = $s;
+            $params[] = $s;
+            $params[] = $s;
         }
 
-        $role = (string)($filters['role'] ?? '');
-        if (in_array($role, ['admin', 'teacher', 'student'], true)) {
-            $conditions[] = 'role = :role';
-            $params[':role'] = $role;
+        if (!empty($filters['role']) &&
+            in_array($filters['role'], ['admin','teacher','student'], true)) {
+            $conditions[] = "role = ?";
+            $params[]     = $filters['role'];
         }
 
-        $status = (string)($filters['status'] ?? '');
-        if ($status === '0' || $status === '1') {
-            $conditions[] = 'is_active = :status';
-            $params[':status'] = (int)$status;
+        if (isset($filters['status']) &&
+            $filters['status'] !== '' &&
+            $filters['status'] !== 'all') {
+            $conditions[] = "is_active = ?";
+            $params[]     = (int)$filters['status'];
         }
 
-        $whereSql = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
-
-        return [$whereSql, $params];
-    }
-
-    private function bindWhereParams(PDOStatement $stmt, array $params): void
-    {
-        foreach ($params as $name => $value) {
-            $type = is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
-            $stmt->bindValue($name, $value, $type);
-        }
+        return ['WHERE ' . implode(' AND ', $conditions), $params];
     }
 
     private function buildOrderBy(string $sort): string
     {
-        return match ($sort) {
-            'oldest' => 'ORDER BY created_at ASC, id ASC',
-            'name_asc' => 'ORDER BY full_name ASC, id ASC',
-            'name_desc' => 'ORDER BY full_name DESC, id DESC',
-            default => 'ORDER BY created_at DESC, id DESC',
+        return match($sort) {
+            'oldest' => 'ORDER BY created_at ASC',
+            'name'   => 'ORDER BY full_name ASC',
+            default  => 'ORDER BY created_at DESC',
         };
     }
+
+    // ── GET BY ID ─────────────────────────────────────────
+    public function getUserById(int $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    // ── EMAIL EXISTS CHECK ────────────────────────────────
+    public function emailExists(string $email, ?int $excludeId = null): bool
+    {
+        if ($excludeId !== null) {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM users WHERE email = ? AND id != ?"
+            );
+            $stmt->execute([$email, $excludeId]);
+        } else {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM users WHERE email = ?"
+            );
+            $stmt->execute([$email]);
+        }
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    // ── CREATE ────────────────────────────────────────────
+    public function createUser(array $data): bool
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO users (full_name, email, password_hash, role, student_code, is_active)
+             VALUES (?, ?, ?, ?, ?, ?)"
+        );
+        return $stmt->execute([
+            $data['full_name'],
+            $data['email'],
+            $data['password_hash'],
+            $data['role'],
+            $data['student_code'] ?? null,
+            $data['is_active']    ?? 1,
+        ]);
+    }
+
+    // ── UPDATE ────────────────────────────────────────────
+    public function updateUser(int $id, array $data): bool
+    {
+        $sets   = ['full_name = ?', 'email = ?', 'role = ?', 'student_code = ?', 'is_active = ?'];
+        $params = [
+            $data['full_name'],
+            $data['email'],
+            $data['role'],
+            $data['student_code'] ?? null,
+            (int)($data['is_active'] ?? 1),
+        ];
+
+        if (!empty($data['password_hash'])) {
+            $sets[]   = 'password_hash = ?';
+            $params[] = $data['password_hash'];
+        }
+
+        $params[] = $id;
+        $sql      = "UPDATE users SET " . implode(', ', $sets) . " WHERE id = ?";
+        return $this->db->prepare($sql)->execute($params);
+    }
+
+    // ── ACTIVATE / DEACTIVATE ────────────────────────────
+    public function setActiveStatus(int $id, int $status): bool
+    {
+        $stmt = $this->db->prepare("UPDATE users SET is_active = ? WHERE id = ?");
+        return $stmt->execute([$status, $id]);
+    }
+
+    // ── STATS cho stat cards ──────────────────────────────
+    public function getUserStats(): array
+    {
+        return [
+            'total'    => (int)$this->db->query("SELECT COUNT(*) FROM users")->fetchColumn(),
+            'active'   => (int)$this->db->query("SELECT COUNT(*) FROM users WHERE is_active = 1")->fetchColumn(),
+            'teachers' => (int)$this->db->query("SELECT COUNT(*) FROM users WHERE role = 'teacher'")->fetchColumn(),
+            'students' => (int)$this->db->query("SELECT COUNT(*) FROM users WHERE role = 'student'")->fetchColumn(),
+        ];
+    }
+
+    public function getPerPage(): int { return $this->perPage; }
 }

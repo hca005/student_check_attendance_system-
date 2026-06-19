@@ -1,37 +1,36 @@
-</div><!-- /.page-body -->
-</div><!-- /.main-content -->
-</div><!-- /.app-shell -->
-
-<!-- Toast container -->
-<div id="toast-container"></div>
+<?php // views/layouts/footer.php ?>
+</div><!-- /page-content -->
+</main><!-- /main-content -->
+</div><!-- /app-wrapper -->
 
 <script>
-// ── Sidebar mobile ──────────────────────────────
-function openSidebar() {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
+// Global action menu toggle
+document.querySelectorAll('.action-menu-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const menu = btn.closest('.action-menu');
+    document.querySelectorAll('.action-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+    menu.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.action-menu.open').forEach(m => m.classList.remove('open'));
+});
 
-// ── Toast helper ────────────────────────────────
-function showToast(message, type = 'info') {
-  const icons = {
-    success: '✓', danger: '✕', info: 'ℹ'
-  };
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${icons[type]||'ℹ'}</span> ${message}`;
-  document.getElementById('toast-container').appendChild(toast);
-  setTimeout(() => toast.remove(), 3500);
+// Modal helpers
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
-
-// ── Show toast from URL param ───────────────────
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('success')) showToast(decodeURIComponent(urlParams.get('success')), 'success');
-if (urlParams.get('error'))   showToast(decodeURIComponent(urlParams.get('error')),   'danger');
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
 </script>
 </body>
 </html>
