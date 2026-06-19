@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 Middleware::requireStudent();
 $pageTitle   = 'My Overview';
 $currentPage = 'student.dashboard';
@@ -18,7 +18,7 @@ $totalPresent  = $db->query("SELECT COUNT(*) FROM attendance_records WHERE stude
 $totalAbsent   = $db->query("SELECT COUNT(*) FROM attendance_records WHERE student_id=? AND status='absent'",  [$userId])->fetchColumn();
 $totalQuizDone = $db->query("SELECT COUNT(*) FROM quiz_submissions WHERE student_id=?", [$userId])->fetchColumn();
 $avgEngage     = $db->query("SELECT ROUND(AVG(engagement_index),1) FROM engagement_scores WHERE student_id=?", [$userId])->fetchColumn() ?? 0;
-$myAlerts      = $db->query("SELECT COUNT(*) FROM alert_logs WHERE student_id=? AND status='open'", [$userId])->fetchColumn();
+$myAlerts      = $db->query("SELECT COUNT(*) FROM alerts WHERE student_id=? AND status='pending'", [$userId])->fetchColumn();
 
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 Middleware::requireTeacher();
 $pageTitle   = 'Teacher Dashboard';
 $currentPage = 'teacher.dashboard';
@@ -17,7 +17,7 @@ $in = implode(',', $courseIds);
 $totalSessions  = $db->query("SELECT COUNT(*) FROM class_sessions WHERE course_id IN ($in)")->fetchColumn();
 $activeSessions = $db->query("SELECT COUNT(*) FROM class_sessions WHERE course_id IN ($in) AND status='active'")->fetchColumn();
 $totalStudents  = $db->query("SELECT COUNT(DISTINCT user_id) FROM enrollments WHERE course_id IN ($in) AND role='student'")->fetchColumn();
-$openAlerts     = $db->query("SELECT COUNT(*) FROM alert_logs WHERE course_id IN ($in) AND status='open'")->fetchColumn();
+$openAlerts     = $db->query("SELECT COUNT(*) FROM alerts WHERE course_id IN ($in) AND status='pending'")->fetchColumn();
 
 $upcoming = $db->query(
   "SELECT cs.*, c.course_name FROM class_sessions cs
