@@ -217,17 +217,17 @@ VALUES
 -- id=7 : open, gắn session ACTIVE id=8 (INS2045) → để demo submit quiz
 -- ════════════════════════════════════════════
 INSERT INTO `quiz_sessions`
-    (`id`, `session_id`, `title`, `description`, `time_limit_minutes`, `status`, `allow_retake`)
+    (`id`, `session_id`, `title`, `description`, `time_limit_minutes`, `status`, `allow_retake`, `questions`)
 VALUES
-(1, 1,  'Quiz HTML & CSS',      'Kiểm tra kiến thức buổi 1',           10, 'closed', 0),
-(2, 2,  'Quiz JavaScript',      'Kiểm tra DOM manipulation',            15, 'closed', 0),
-(3, 3,  'Quiz PHP Căn bản',     'Kiểm tra kiến thức PHP cơ bản',       10, 'closed', 0),
-(4, 6,  'Quiz ER Diagram',      'Ký hiệu & quan hệ trong ER',          10, 'closed', 0),
-(5, 7,  'Quiz Normalization',   'Chuẩn 1NF, 2NF, 3NF',                12, 'closed', 0),
+(1, 1,  'Quiz HTML & CSS',      'Kiểm tra kiến thức buổi 1',           10, 'closed', 0, '[{"id":"1","text":"Thẻ nào dùng để in đậm chữ trong HTML?","options":{"A":"<b>","B":"<i>","C":"<u>","D":"<p>"},"correct":"A"},{"id":"2","text":"Thuộc tính CSS nào đổi màu nền?","options":{"A":"color","B":"background-color","C":"bg-color","D":"font-color"},"correct":"B"}]'),
+(2, 2,  'Quiz JavaScript',      'Kiểm tra DOM manipulation',            15, 'closed', 0, '[{"id":"3","text":"Hàm nào dùng để tìm thẻ theo ID?","options":{"A":"getElementById","B":"querySelector","C":"Cả A và B đều đúng","D":"getElementsByTagName"},"correct":"C"},{"id":"4","text":"Sự kiện click chuột là?","options":{"A":"onchange","B":"onhover","C":"onclick","D":"onsubmit"},"correct":"C"}]'),
+(3, 3,  'Quiz PHP Căn bản',     'Kiểm tra kiến thức PHP cơ bản',       10, 'closed', 0, '[{"id":"5","text":"Ký hiệu nào khai báo biến trong PHP?","options":{"A":"@","B":"&","C":"$","D":"#"},"correct":"C"},{"id":"6","text":"Hàm nào in dữ liệu ra màn hình trong PHP?","options":{"A":"print_r()","B":"var_dump()","C":"echo","D":"Tất cả đều đúng"},"correct":"D"}]'),
+(4, 6,  'Quiz ER Diagram',      'Ký hiệu & quan hệ trong ER',          10, 'closed', 0, '[{"id":"7","text":"Hình thoi trong ERD biểu diễn gì?","options":{"A":"Thực thể","B":"Mối quan hệ","C":"Thuộc tính","D":"Khóa chính"},"correct":"B"},{"id":"8","text":"Khóa chính dùng để làm gì?","options":{"A":"Phân biệt các dòng dữ liệu","B":"Tăng tốc độ truy vấn","C":"Liên kết bảng","D":"Lọc dữ liệu"},"correct":"A"}]'),
+(5, 7,  'Quiz Normalization',   'Chuẩn 1NF, 2NF, 3NF',                12, 'closed', 0, '[{"id":"9","text":"Chuẩn 1NF yêu cầu gì?","options":{"A":"Không có nhóm lặp","B":"Khóa chính duy nhất","C":"Giá trị nguyên tử","D":"Tất cả đều đúng"},"correct":"C"},{"id":"10","text":"Chuẩn 2NF giải quyết vấn đề gì?","options":{"A":"Phụ thuộc một phần","B":"Phụ thuộc bắc cầu","C":"Dữ liệu lặp","D":"Khóa ngoại"},"correct":"A"},{"id":"11","text":"Đặc điểm của 3NF là gì?","options":{"A":"Không phụ thuộc bắc cầu","B":"Khóa ngoại bắt buộc","C":"Không có NULL","D":"Dữ liệu đã chuẩn hóa hoàn toàn"},"correct":"A"}]'),
 -- OPEN – để demo: sinh viên có thể vào submit quiz thật
-(6, 4,  'Quiz MySQL & PDO',     'Truy vấn SQL nâng cao và PDO',        15, 'open',   0),
-(7, 8,  'Quiz SQL Queries',     'JOIN, subquery, aggregate functions',  15, 'open',   0),
-(8, 10, 'Quiz Giới thiệu LP',   'Khái niệm cơ bản lập trình',          8,  'closed', 0);
+(6, 4,  'Quiz MySQL & PDO',     'Truy vấn SQL nâng cao và PDO',        15, 'open',   0, '[{"id":"14","text":"PDO là viết tắt của?","options":{"A":"PHP Data Objects","B":"PHP Database Output","C":"Personal Data Object","D":"Public Data Oriented"},"correct":"A"},{"id":"15","text":"Hàm nào chuẩn bị một câu lệnh PDO?","options":{"A":"prepare()","B":"query()","C":"execute()","D":"bind()"},"correct":"A"}]'),
+(7, 8,  'Quiz SQL Queries',     'JOIN, subquery, aggregate functions',  15, 'open',   0, '[{"id":"16","text":"Lệnh JOIN nào lấy tất cả dữ liệu từ bảng bên trái?","options":{"A":"INNER JOIN","B":"LEFT JOIN","C":"RIGHT JOIN","D":"FULL JOIN"},"correct":"B"},{"id":"17","text":"Hàm nào tính tổng các giá trị?","options":{"A":"COUNT()","B":"SUM()","C":"AVG()","D":"MAX()"},"correct":"B"}]'),
+(8, 10, 'Quiz Giới thiệu LP',   'Khái niệm cơ bản lập trình',          8,  'closed', 0, '[{"id":"12","text":"Thuật toán là gì?","options":{"A":"Các bước giải quyết bài toán","B":"Một ngôn ngữ lập trình","C":"Hệ điều hành","D":"Một dạng dữ liệu"},"correct":"A"},{"id":"13","text":"Cấu trúc lặp nào không kiểm tra điều kiện trước khi chạy lần đầu?","options":{"A":"while","B":"do...while","C":"for","D":"foreach"},"correct":"B"}]');
 
 -- ════════════════════════════════════════════
 -- 8. QUIZ SUBMISSIONS

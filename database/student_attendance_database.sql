@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `quiz_sessions` (
     `time_limit_minutes` INT          DEFAULT NULL COMMENT 'NULL = không giới hạn',
     `status`             ENUM('draft','open','closed') NOT NULL DEFAULT 'draft',
     `allow_retake`       TINYINT(1)   NOT NULL DEFAULT 0,
+    `questions`          TEXT         DEFAULT NULL COMMENT 'JSON string chứa mảng câu hỏi: [{"id":"1","text":"...","options":{"A":"...","B":"..."},"correct":"A"}]',
     `created_at`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -183,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `quiz_sessions` (
     INDEX `idx_qs_status`  (`status`),
     CONSTRAINT `fk_qs_session` FOREIGN KEY (`session_id`) REFERENCES `class_sessions`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Phiên quiz trắc nghiệm trong buổi học';
+COMMENT='Phiên quiz trắc nghiệm trong buổi học (chứa luôn JSON câu hỏi)';
 
 -- 8. engagement_rules
 -- Lưu trọng số / quy tắc tính engagement_index theo từng course.
