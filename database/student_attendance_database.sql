@@ -185,6 +185,26 @@ CREATE TABLE IF NOT EXISTS `quiz_sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Phiên quiz trắc nghiệm trong buổi học';
 
+-- 7b. quiz_questions
+CREATE TABLE IF NOT EXISTS `quiz_questions` (
+    `id`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `quiz_id`        INT UNSIGNED NOT NULL,
+    `question_text`  TEXT NOT NULL,
+    `option_a`       VARCHAR(255) NOT NULL,
+    `option_b`       VARCHAR(255) NOT NULL,
+    `option_c`       VARCHAR(255) DEFAULT NULL,
+    `option_d`       VARCHAR(255) DEFAULT NULL,
+    `correct_option` ENUM('A','B','C','D') NOT NULL DEFAULT 'A',
+    `points`         DECIMAL(4,2) NOT NULL DEFAULT 1.00,
+    `order_num`      INT NOT NULL DEFAULT 1,
+    `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_qq_quiz` (`quiz_id`),
+    INDEX `idx_qq_order` (`order_num`),
+    CONSTRAINT `fk_qq_quiz` FOREIGN KEY (`quiz_id`) REFERENCES `quiz_sessions`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Danh sách câu hỏi của một bài quiz';
+
 -- 8. engagement_rules
 -- Lưu trọng số / quy tắc tính engagement_index theo từng course.
 -- Ưu tiên: nếu course có engagement_rules thì dùng rule_value thay vì giá trị mặc định trong courses.
