@@ -133,6 +133,7 @@ $lastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '
           <td><?= htmlspecialchars(date('Y-m-d', strtotime((string)$user['created_at']))) ?></td>
           <td>
             <div class="action-row">
+              <a class="btn btn-sm" style="background:#f1f5f9;color:#334155" href="<?= APP_URL ?>/index.php?page=admin_users_show&id=<?= (int)$user['id'] ?>">View</a>
               <a class="btn btn-outline btn-sm" href="<?= APP_URL ?>/index.php?page=admin_users_edit&id=<?= (int)$user['id'] ?>">Edit</a>
               <?php if ((int)$user['is_active'] === 1): ?>
                 <form method="post" action="<?= APP_URL ?>/index.php?page=admin_users_deactivate&id=<?= (int)$user['id'] ?>" onsubmit="return confirm('Deactivate this user?')">
@@ -221,10 +222,66 @@ $lastName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Identification Number (ID)</label>
-          <input type="text" name="student_code" id="modal_student_code" value="<?= htmlspecialchars((string)$old['student_code']) ?>" placeholder="AUTO-GENERATED">
-          <?php if (!empty($createErrors['student_code'])): ?><div class="error-text"><?= htmlspecialchars((string)$createErrors['student_code']) ?></div><?php endif; ?>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Identification Number (ID)</label>
+            <input type="text" name="student_code" id="modal_student_code" value="<?= htmlspecialchars((string)$old['student_code']) ?>" placeholder="AUTO-GENERATED">
+            <?php if (!empty($createErrors['student_code'])): ?><div class="error-text"><?= htmlspecialchars((string)$createErrors['student_code']) ?></div><?php endif; ?>
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select name="gender">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" name="date_of_birth">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" name="phone" placeholder="e.g. 0987654321">
+          </div>
+        </div>
+
+        <!-- Student Only Fields -->
+        <div id="student_fields" style="display: none; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <h4 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase">Student Details</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Class Name</label>
+              <input type="text" name="class_name" placeholder="e.g. CS101">
+            </div>
+            <div class="form-group">
+              <label>Academic Year</label>
+              <input type="text" name="academic_year" placeholder="e.g. 2024-2028">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Major / Department</label>
+            <input type="text" name="department" placeholder="e.g. Computer Science">
+          </div>
+        </div>
+
+        <!-- Teacher Only Fields -->
+        <div id="teacher_fields" style="display: none; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+          <h4 style="margin-top:0;margin-bottom:12px;font-size:13px;color:#64748b;text-transform:uppercase">Teacher Details</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Qualification</label>
+              <input type="text" name="qualification" placeholder="e.g. PhD">
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" name="department_teacher" onchange="document.getElementsByName('department')[0].value = this.value;" placeholder="e.g. Software Engineering">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -254,12 +311,24 @@ function updateFullName() {
 function autoStudentCode() {
   const role = document.getElementById('modal_role').value;
   const codeInput = document.getElementById('modal_student_code');
-  if (role === 'student' && codeInput.value.trim() === '') {
-    const stamp = Date.now().toString().slice(-6);
-    codeInput.value = 'STD-' + stamp;
-  }
-  if (role !== 'student') {
+  const studentFields = document.getElementById('student_fields');
+  const teacherFields = document.getElementById('teacher_fields');
+
+  if (role === 'student') {
+    if (codeInput.value.trim() === '') {
+      const stamp = Date.now().toString().slice(-6);
+      codeInput.value = 'STD-' + stamp;
+    }
+    studentFields.style.display = 'block';
+    teacherFields.style.display = 'none';
+  } else if (role === 'teacher') {
     codeInput.value = '';
+    studentFields.style.display = 'none';
+    teacherFields.style.display = 'block';
+  } else {
+    codeInput.value = '';
+    studentFields.style.display = 'none';
+    teacherFields.style.display = 'none';
   }
 }
 

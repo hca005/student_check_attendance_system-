@@ -3,15 +3,15 @@
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2>Phương thức Điểm danh - <?php echo htmlspecialchars($session['course_code']); ?></h2>
-            <p class="text-muted">Buổi: <?php echo date('d/m/Y H:i', strtotime($session['session_date'] . ' ' . $session['start_time'])); ?></p>
+<div style="padding: 24px;">
+    <div class="admin-page-title">
+        <div class="left">
+            <h1 style="font-size: 24px; margin-bottom: 4px;">Phương thức Điểm danh - <?php echo htmlspecialchars($session['course_code']); ?></h1>
+            <p>Buổi: <?php echo date('d/m/Y H:i', strtotime($session['session_date'] . ' ' . $session['start_time'])); ?></p>
         </div>
-        <div class="col-md-4 text-end">
+        <div class="right">
             <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary">
-                <i class="bi bi-plus"></i> Tạo Phương thức
+                Tạo Phương thức
             </a>
         </div>
     </div>

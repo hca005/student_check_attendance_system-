@@ -56,10 +56,67 @@ require APP_ROOT . '/views/layouts/header.php';
         <input type="text" name="student_code" value="<?= htmlspecialchars((string)$old['student_code']) ?>">
       </div>
       <div class="form-group">
+        <label>Gender</label>
+        <select name="gender">
+          <option value="">Select Gender</option>
+          <option value="Male" <?= ($old['gender'] ?? '') === 'Male' ? 'selected' : '' ?>>Male</option>
+          <option value="Female" <?= ($old['gender'] ?? '') === 'Female' ? 'selected' : '' ?>>Female</option>
+          <option value="Other" <?= ($old['gender'] ?? '') === 'Other' ? 'selected' : '' ?>>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" name="date_of_birth" value="<?= htmlspecialchars((string)($old['date_of_birth'] ?? '')) ?>">
+      </div>
+      <div class="form-group">
+        <label>ID Card Number (CCCD)</label>
+        <input type="text" name="id_card_number" value="<?= htmlspecialchars((string)($old['id_card_number'] ?? '')) ?>">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" name="phone" value="<?= htmlspecialchars((string)($old['phone'] ?? '')) ?>">
+      </div>
+      <div class="form-group">
+        <label>Hometown</label>
+        <input type="text" name="hometown" value="<?= htmlspecialchars((string)($old['hometown'] ?? '')) ?>">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Class Name (Student)</label>
+        <input type="text" name="class_name" value="<?= htmlspecialchars((string)($old['class_name'] ?? '')) ?>">
+      </div>
+      <div class="form-group">
+        <label>Academic Year (Student)</label>
+        <input type="text" name="academic_year" value="<?= htmlspecialchars((string)($old['academic_year'] ?? '')) ?>">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Major / Department</label>
+        <input type="text" name="department" value="<?= htmlspecialchars((string)($old['department'] ?? '')) ?>">
+      </div>
+      <div class="form-group">
+        <label>Qualification (Teacher)</label>
+        <input type="text" name="qualification" value="<?= htmlspecialchars((string)($old['qualification'] ?? '')) ?>">
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
         <label>New Password (optional)</label>
         <input type="password" name="password" placeholder="Leave blank to keep current password">
         <?php if (!empty($errors['password'])): ?><div class="error-text"><?= $errors['password'] ?></div><?php endif; ?>
       </div>
+      <div></div>
     </div>
 
     <div style="display:flex;gap:8px;justify-content:flex-end">

@@ -41,9 +41,9 @@ require APP_ROOT . '/views/layouts/header.php';
     </div>
 
     <div class="form-group">
-      <label>User</label>
-      <select name="user_id" id="userSelect" required></select>
-      <?php if (!empty($errors['user_id'])): ?><div class="error-text"><?= $errors['user_id'] ?></div><?php endif; ?>
+      <label>User(s) <small style="color:#64748b;font-weight:normal">(Hold Ctrl/Cmd to select multiple)</small></label>
+      <select name="user_ids[]" id="userSelect" multiple size="8" required></select>
+      <?php if (!empty($errors['user_ids'])): ?><div class="error-text"><?= $errors['user_ids'] ?></div><?php endif; ?>
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:8px">
@@ -56,18 +56,18 @@ require APP_ROOT . '/views/layouts/header.php';
 <script>
 const teacherUsers = <?= json_encode($teacherUsers, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 const studentUsers = <?= json_encode($studentUsers, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
-const currentUserId = '<?= (string)$record['user_id'] ?>';
+const currentUserIds = <?= json_encode($record['user_ids'] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
 function fillUserOptions() {
   const role = document.getElementById('roleSelect').value;
   const list = role === 'teacher' ? teacherUsers : studentUsers;
   const select = document.getElementById('userSelect');
-  select.innerHTML = '<option value="">Select user</option>';
+  select.innerHTML = '';
   list.forEach((user) => {
     const option = document.createElement('option');
     option.value = String(user.id);
-    option.textContent = `${user.full_name} (${user.email})`;
-    if (String(user.id) === currentUserId) {
+    option.textContent = `${user.full_name} (${user.email}) - ${user.student_code || 'N/A'}`;
+    if (currentUserIds.includes(Number(user.id)) || currentUserIds.includes(String(user.id))) {
       option.selected = true;
     }
     select.appendChild(option);

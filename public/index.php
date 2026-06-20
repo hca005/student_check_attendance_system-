@@ -37,6 +37,9 @@ switch ($page) {
     case 'admin_users_create':
         $userController->create();
         exit;
+    case 'admin_users_show':
+        $userController->show();
+        exit;
     case 'admin_users_store':
         $userController->store();
         exit;

@@ -402,6 +402,10 @@ class QuizController
     // ──────────────────────────────────────────────────────
     private function verifyTeacherOwnsSession(int $sessionId): void
     {
+        if (($_SESSION['role'] ?? '') === 'admin') {
+            return;
+        }
+
         $stmt = $this->db->prepare(
             'SELECT teacher_id FROM class_sessions WHERE id = ?'
         );
