@@ -4,7 +4,7 @@
 // Quản lý cảnh báo sinh viên vắng nhiều / tương tác thấp
 // Repository Pattern – CRUD + alert generation logic
 // Thành viên 3 phụ trách
-// ============================================================
+//
 
 require_once APP_ROOT . '/config/Database.php';
 
@@ -12,15 +12,16 @@ class AlertLogModel
 {
     private PDO $db;
 
-    // Alert types (theo ENUM trong schema)
-    public const TYPE_HIGH_ABSENCE   = 'high_absence';
+    public const TYPE_LOW_ATTENDANCE = 'low_attendance';
     public const TYPE_LOW_ENGAGEMENT = 'low_engagement';
-    public const TYPE_MISSED_QUIZ    = 'missed_quiz';
 
-    // Statuses
-    public const STATUS_OPEN     = 'open';
+    public const SEVERITY_LOW    = 'low';
+    public const SEVERITY_MEDIUM = 'medium';
+    public const SEVERITY_HIGH   = 'high';
+
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_REVIEWED = 'reviewed';
     public const STATUS_RESOLVED = 'resolved';
-    public const STATUS_IGNORED  = 'ignored';
 
     public function __construct()
     {
@@ -34,13 +35,14 @@ class AlertLogModel
         int    $studentId,
         int    $courseId,
         string $alertType,
-        string $alertMessage
+        string $message,
+        string $severity = self::SEVERITY_MEDIUM
     ): int {
         $stmt = $this->db->prepare(
-            'INSERT INTO alert_logs (student_id, course_id, alert_type, alert_message, status)
-             VALUES (?, ?, ?, ?, "open")'
+            'INSERT INTO alerts (student_id, course_id, alert_type, message, severity, status)
+             VALUES (?, ?, ?, ?, ?, "pending")'
         );
-        $stmt->execute([$studentId, $courseId, $alertType, $alertMessage]);
+        $stmt->execute([$studentId, $courseId, $alertType, $message, $severity]);
         return (int) $this->db->lastInsertId();
     }
 
@@ -50,9 +52,9 @@ class AlertLogModel
     public function getById(int $id): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT id, student_id, course_id, alert_type, alert_message,
-                    status, resolved_by, resolved_at, created_at
-             FROM alert_logs WHERE id = ? LIMIT 1'
+            'SELECT alert_id, student_id, course_id, alert_type, message, severity,
+                    status, reviewed_by, reviewed_at, created_at
+             FROM alerts WHERE alert_id = ? LIMIT 1'
         );
         $stmt->execute([$id]);
         return $stmt->fetch() ?: null;
@@ -64,10 +66,10 @@ class AlertLogModel
     public function getByStudentId(int $studentId): array
     {
         $stmt = $this->db->prepare(
-            'SELECT al.id, al.student_id, al.course_id, al.alert_type,
-                    al.alert_message, al.status, al.created_at,
+            'SELECT al.alert_id, al.student_id, al.course_id, al.alert_type,
+                    al.message, al.severity, al.status, al.created_at,
                     c.course_name, c.course_code
-             FROM alert_logs al
+             FROM alerts al
              JOIN courses c ON al.course_id = c.id
              WHERE al.student_id = ?
              ORDER BY al.created_at DESC'
@@ -77,16 +79,17 @@ class AlertLogModel
     }
 
     // ──────────────────────────────────────────────────────
-    // READ – Lấy alerts đang mở của student
+    // READ – Lấy alerts đang chờ xử lý (pending) của student
     // ──────────────────────────────────────────────────────
     public function getOpenAlertsByStudent(int $studentId): array
     {
         $stmt = $this->db->prepare(
-            'SELECT al.id, al.course_id, al.alert_type, al.alert_message, al.created_at,
+            'SELECT al.alert_id, al.course_id, al.alert_type, al.message,
+                    al.severity, al.created_at,
                     c.course_name, c.course_code
-             FROM alert_logs al
+             FROM alerts al
              JOIN courses c ON al.course_id = c.id
-             WHERE al.student_id = ? AND al.status = "open"
+             WHERE al.student_id = ? AND al.status = "pending"
              ORDER BY al.created_at DESC'
         );
         $stmt->execute([$studentId]);
@@ -98,10 +101,10 @@ class AlertLogModel
     // ──────────────────────────────────────────────────────
     public function getByCourseId(int $courseId, string $status = ''): array
     {
-        $sql = 'SELECT al.id, al.student_id, al.alert_type, al.alert_message,
-                       al.status, al.created_at, al.resolved_at,
+        $sql = 'SELECT al.alert_id, al.student_id, al.alert_type, al.message,
+                       al.severity, al.status, al.created_at, al.reviewed_at,
                        u.full_name, u.student_code
-                FROM alert_logs al
+                FROM alerts al
                 JOIN users u ON al.student_id = u.id
                 WHERE al.course_id = ?';
         $params = [$courseId];
@@ -122,7 +125,7 @@ class AlertLogModel
     // ──────────────────────────────────────────────────────
     public function update(int $id, array $data): bool
     {
-        $allowed = ['status', 'alert_message'];
+        $allowed = ['status', 'message', 'severity'];
         $updates = [];
         $values  = [];
 
@@ -133,12 +136,11 @@ class AlertLogModel
             }
         }
 
-        // Nếu resolve thì ghi thêm resolved_at và resolved_by
-        if (isset($data['status']) && $data['status'] === self::STATUS_RESOLVED) {
-            $updates[] = 'resolved_at = NOW()';
-            if (isset($data['resolved_by'])) {
-                $updates[] = 'resolved_by = ?';
-                $values[]  = (int) $data['resolved_by'];
+        if (isset($data['status']) && in_array($data['status'], [self::STATUS_REVIEWED, self::STATUS_RESOLVED], true)) {
+            $updates[] = 'reviewed_at = NOW()';
+            if (isset($data['reviewed_by'])) {
+                $updates[] = 'reviewed_by = ?';
+                $values[]  = (int) $data['reviewed_by'];
             }
         }
 
@@ -147,7 +149,7 @@ class AlertLogModel
         }
 
         $values[] = $id;
-        $sql = 'UPDATE alert_logs SET ' . implode(', ', $updates) . ' WHERE id = ?';
+        $sql = 'UPDATE alerts SET ' . implode(', ', $updates) . ' WHERE alert_id = ?';
         return $this->db->prepare($sql)->execute($values);
     }
 
@@ -156,23 +158,17 @@ class AlertLogModel
     // ──────────────────────────────────────────────────────
     public function delete(int $id): bool
     {
-        return $this->db->prepare('DELETE FROM alert_logs WHERE id = ?')
+        return $this->db->prepare('DELETE FROM alerts WHERE alert_id = ?')
                         ->execute([$id]);
     }
 
     // ──────────────────────────────────────────────────────
     // BUSINESS LOGIC – Tự động sinh cảnh báo cho 1 student
-    //
-    // Kiểm tra 2 điều kiện theo ngưỡng đặt trong bảng courses:
-    //   1. absence_threshold   → vắng > ngưỡng → high_absence
-    //   2. low_engagement_threshold → engagement_index thấp → low_engagement
-    // Tránh tạo trùng alert cùng loại đang "open"
     // ──────────────────────────────────────────────────────
     public function generateAlerts(int $studentId, int $courseId): array
     {
         $created = [];
 
-        // Lấy ngưỡng từ course
         $stmtCourse = $this->db->prepare(
             'SELECT absence_threshold, low_engagement_threshold, course_name
              FROM courses WHERE id = ? LIMIT 1'
@@ -193,11 +189,13 @@ class AlertLogModel
         $absenceCount = (int) $stmtAbs->fetchColumn();
 
         if ($absenceCount > (int) $course['absence_threshold']) {
-            if (!$this->hasOpenAlert($studentId, $courseId, self::TYPE_HIGH_ABSENCE)) {
+            if (!$this->hasOpenAlert($studentId, $courseId, self::TYPE_LOW_ATTENDANCE)) {
                 $msg = "Bạn đã vắng $absenceCount buổi trong môn {$course['course_name']} "
                      . "(ngưỡng: {$course['absence_threshold']} buổi). Vui lòng liên hệ giảng viên.";
-                $this->create($studentId, $courseId, self::TYPE_HIGH_ABSENCE, $msg);
-                $created[] = self::TYPE_HIGH_ABSENCE;
+                $severity = $absenceCount >= (int)$course['absence_threshold'] * 2
+                    ? self::SEVERITY_HIGH : self::SEVERITY_MEDIUM;
+                $this->create($studentId, $courseId, self::TYPE_LOW_ATTENDANCE, $msg, $severity);
+                $created[] = self::TYPE_LOW_ATTENDANCE;
             }
         }
 
@@ -214,7 +212,9 @@ class AlertLogModel
                 $msg = "Điểm tham gia lớp học của bạn trong môn {$course['course_name']} "
                      . "là {$engIndex}% (ngưỡng tối thiểu: {$course['low_engagement_threshold']}%). "
                      . "Hãy tích cực tham gia hơn.";
-                $this->create($studentId, $courseId, self::TYPE_LOW_ENGAGEMENT, $msg);
+                $severity = $engIndex < (float)$course['low_engagement_threshold'] / 2
+                    ? self::SEVERITY_HIGH : self::SEVERITY_MEDIUM;
+                $this->create($studentId, $courseId, self::TYPE_LOW_ENGAGEMENT, $msg, $severity);
                 $created[] = self::TYPE_LOW_ENGAGEMENT;
             }
         }
@@ -223,25 +223,25 @@ class AlertLogModel
     }
 
     // ──────────────────────────────────────────────────────
-    // HELPER – Kiểm tra có alert open cùng loại chưa
+    // HELPER – Kiểm tra có alert pending cùng loại chưa
     // ──────────────────────────────────────────────────────
     public function hasOpenAlert(int $studentId, int $courseId, string $alertType): bool
     {
         $stmt = $this->db->prepare(
-            'SELECT COUNT(*) FROM alert_logs
-             WHERE student_id = ? AND course_id = ? AND alert_type = ? AND status = "open"'
+            'SELECT COUNT(*) FROM alerts
+             WHERE student_id = ? AND course_id = ? AND alert_type = ? AND status = "pending"'
         );
         $stmt->execute([$studentId, $courseId, $alertType]);
         return (int) $stmt->fetchColumn() > 0;
     }
 
     // ──────────────────────────────────────────────────────
-    // HELPER – Đếm alert mở của student
+    // HELPER – Đếm alert pending của student
     // ──────────────────────────────────────────────────────
     public function countOpenAlerts(int $studentId): int
     {
         $stmt = $this->db->prepare(
-            'SELECT COUNT(*) FROM alert_logs WHERE student_id = ? AND status = "open"'
+            'SELECT COUNT(*) FROM alerts WHERE student_id = ? AND status = "pending"'
         );
         $stmt->execute([$studentId]);
         return (int) $stmt->fetchColumn();

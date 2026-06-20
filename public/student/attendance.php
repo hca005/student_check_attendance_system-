@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'checkin') {
     // Xác thực OTP – tìm method có token khớp + session đang active
     $method = $db->query(
         'SELECT am.* FROM attendance_methods am
-         WHERE am.session_id = ? AND am.token_value = ?
+         WHERE am.session_id = ? AND am.token = ?
            AND am.is_active = 1
            AND (am.expires_at IS NULL OR am.expires_at > NOW())
          LIMIT 1',
