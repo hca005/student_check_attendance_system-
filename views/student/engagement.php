@@ -17,7 +17,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
   <?php foreach ($openAlerts as $al): ?>
   <div style="font-size:13px;color:#92400E;padding:6px 0;border-bottom:1px solid rgba(245,158,11,.2)">
     <strong>[<?= htmlspecialchars($al['course_code']) ?>]</strong>
-    <?= htmlspecialchars($al['alert_message']) ?>
+    <?= htmlspecialchars($al['message']) ?>
   </div>
   <?php endforeach; ?>
 </div>
