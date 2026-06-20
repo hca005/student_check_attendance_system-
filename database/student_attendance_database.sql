@@ -176,7 +176,6 @@ CREATE TABLE IF NOT EXISTS `quiz_sessions` (
     `time_limit_minutes` INT          DEFAULT NULL COMMENT 'NULL = không giới hạn',
     `status`             ENUM('draft','open','closed') NOT NULL DEFAULT 'draft',
     `allow_retake`       TINYINT(1)   NOT NULL DEFAULT 0,
-    `questions`          TEXT         DEFAULT NULL COMMENT 'JSON string chứa mảng câu hỏi: [{"id":"1","text":"...","options":{"A":"...","B":"..."},"correct":"A"}]',
     `created_at`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -184,7 +183,27 @@ CREATE TABLE IF NOT EXISTS `quiz_sessions` (
     INDEX `idx_qs_status`  (`status`),
     CONSTRAINT `fk_qs_session` FOREIGN KEY (`session_id`) REFERENCES `class_sessions`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Phiên quiz trắc nghiệm trong buổi học (chứa luôn JSON câu hỏi)';
+COMMENT='Phiên quiz trắc nghiệm trong buổi học';
+
+-- 7b. quiz_questions
+CREATE TABLE IF NOT EXISTS `quiz_questions` (
+    `id`             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `quiz_id`        INT UNSIGNED NOT NULL,
+    `question_text`  TEXT NOT NULL,
+    `option_a`       VARCHAR(255) NOT NULL,
+    `option_b`       VARCHAR(255) NOT NULL,
+    `option_c`       VARCHAR(255) DEFAULT NULL,
+    `option_d`       VARCHAR(255) DEFAULT NULL,
+    `correct_option` ENUM('A','B','C','D') NOT NULL DEFAULT 'A',
+    `points`         DECIMAL(4,2) NOT NULL DEFAULT 1.00,
+    `order_num`      INT NOT NULL DEFAULT 1,
+    `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_qq_quiz` (`quiz_id`),
+    INDEX `idx_qq_order` (`order_num`),
+    CONSTRAINT `fk_qq_quiz` FOREIGN KEY (`quiz_id`) REFERENCES `quiz_sessions`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Danh sách câu hỏi của một bài quiz';
 
 -- 8. engagement_rules
 -- Lưu trọng số / quy tắc tính engagement_index theo từng course.

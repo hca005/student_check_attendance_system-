@@ -31,6 +31,7 @@ TRUNCATE TABLE `engagement_scores`;
 TRUNCATE TABLE `engagement_rules`;
 TRUNCATE TABLE `interaction_logs`;
 TRUNCATE TABLE `quiz_submissions`;
+TRUNCATE TABLE `quiz_questions`;
 TRUNCATE TABLE `quiz_sessions`;
 TRUNCATE TABLE `attendance_records`;
 TRUNCATE TABLE `attendance_methods`;
@@ -217,17 +218,49 @@ VALUES
 -- id=7 : open, gắn session ACTIVE id=8 (INS2045) → để demo submit quiz
 -- ════════════════════════════════════════════
 INSERT INTO `quiz_sessions`
-    (`id`, `session_id`, `title`, `description`, `time_limit_minutes`, `status`, `allow_retake`, `questions`)
+    (`id`, `session_id`, `title`, `description`, `time_limit_minutes`, `status`, `allow_retake`)
 VALUES
-(1, 1,  'Quiz HTML & CSS',      'Kiểm tra kiến thức buổi 1',           10, 'closed', 0, '[{"id":"1","text":"Thẻ nào dùng để in đậm chữ trong HTML?","options":{"A":"<b>","B":"<i>","C":"<u>","D":"<p>"},"correct":"A"},{"id":"2","text":"Thuộc tính CSS nào đổi màu nền?","options":{"A":"color","B":"background-color","C":"bg-color","D":"font-color"},"correct":"B"}]'),
-(2, 2,  'Quiz JavaScript',      'Kiểm tra DOM manipulation',            15, 'closed', 0, '[{"id":"3","text":"Hàm nào dùng để tìm thẻ theo ID?","options":{"A":"getElementById","B":"querySelector","C":"Cả A và B đều đúng","D":"getElementsByTagName"},"correct":"C"},{"id":"4","text":"Sự kiện click chuột là?","options":{"A":"onchange","B":"onhover","C":"onclick","D":"onsubmit"},"correct":"C"}]'),
-(3, 3,  'Quiz PHP Căn bản',     'Kiểm tra kiến thức PHP cơ bản',       10, 'closed', 0, '[{"id":"5","text":"Ký hiệu nào khai báo biến trong PHP?","options":{"A":"@","B":"&","C":"$","D":"#"},"correct":"C"},{"id":"6","text":"Hàm nào in dữ liệu ra màn hình trong PHP?","options":{"A":"print_r()","B":"var_dump()","C":"echo","D":"Tất cả đều đúng"},"correct":"D"}]'),
-(4, 6,  'Quiz ER Diagram',      'Ký hiệu & quan hệ trong ER',          10, 'closed', 0, '[{"id":"7","text":"Hình thoi trong ERD biểu diễn gì?","options":{"A":"Thực thể","B":"Mối quan hệ","C":"Thuộc tính","D":"Khóa chính"},"correct":"B"},{"id":"8","text":"Khóa chính dùng để làm gì?","options":{"A":"Phân biệt các dòng dữ liệu","B":"Tăng tốc độ truy vấn","C":"Liên kết bảng","D":"Lọc dữ liệu"},"correct":"A"}]'),
-(5, 7,  'Quiz Normalization',   'Chuẩn 1NF, 2NF, 3NF',                12, 'closed', 0, '[{"id":"9","text":"Chuẩn 1NF yêu cầu gì?","options":{"A":"Không có nhóm lặp","B":"Khóa chính duy nhất","C":"Giá trị nguyên tử","D":"Tất cả đều đúng"},"correct":"C"},{"id":"10","text":"Chuẩn 2NF giải quyết vấn đề gì?","options":{"A":"Phụ thuộc một phần","B":"Phụ thuộc bắc cầu","C":"Dữ liệu lặp","D":"Khóa ngoại"},"correct":"A"},{"id":"11","text":"Đặc điểm của 3NF là gì?","options":{"A":"Không phụ thuộc bắc cầu","B":"Khóa ngoại bắt buộc","C":"Không có NULL","D":"Dữ liệu đã chuẩn hóa hoàn toàn"},"correct":"A"}]'),
+(1, 1,  'Quiz HTML & CSS',      'Kiểm tra kiến thức buổi 1',           10, 'closed', 0),
+(2, 2,  'Quiz JavaScript',      'Kiểm tra DOM manipulation',            15, 'closed', 0),
+(3, 3,  'Quiz PHP Căn bản',     'Kiểm tra kiến thức PHP cơ bản',       10, 'closed', 0),
+(4, 6,  'Quiz ER Diagram',      'Ký hiệu & quan hệ trong ER',          10, 'closed', 0),
+(5, 7,  'Quiz Normalization',   'Chuẩn 1NF, 2NF, 3NF',                12, 'closed', 0),
 -- OPEN – để demo: sinh viên có thể vào submit quiz thật
-(6, 4,  'Quiz MySQL & PDO',     'Truy vấn SQL nâng cao và PDO',        15, 'open',   0, '[{"id":"14","text":"PDO là viết tắt của?","options":{"A":"PHP Data Objects","B":"PHP Database Output","C":"Personal Data Object","D":"Public Data Oriented"},"correct":"A"},{"id":"15","text":"Hàm nào chuẩn bị một câu lệnh PDO?","options":{"A":"prepare()","B":"query()","C":"execute()","D":"bind()"},"correct":"A"}]'),
-(7, 8,  'Quiz SQL Queries',     'JOIN, subquery, aggregate functions',  15, 'open',   0, '[{"id":"16","text":"Lệnh JOIN nào lấy tất cả dữ liệu từ bảng bên trái?","options":{"A":"INNER JOIN","B":"LEFT JOIN","C":"RIGHT JOIN","D":"FULL JOIN"},"correct":"B"},{"id":"17","text":"Hàm nào tính tổng các giá trị?","options":{"A":"COUNT()","B":"SUM()","C":"AVG()","D":"MAX()"},"correct":"B"}]'),
-(8, 10, 'Quiz Giới thiệu LP',   'Khái niệm cơ bản lập trình',          8,  'closed', 0, '[{"id":"12","text":"Thuật toán là gì?","options":{"A":"Các bước giải quyết bài toán","B":"Một ngôn ngữ lập trình","C":"Hệ điều hành","D":"Một dạng dữ liệu"},"correct":"A"},{"id":"13","text":"Cấu trúc lặp nào không kiểm tra điều kiện trước khi chạy lần đầu?","options":{"A":"while","B":"do...while","C":"for","D":"foreach"},"correct":"B"}]');
+(6, 4,  'Quiz MySQL & PDO',     'Truy vấn SQL nâng cao và PDO',        15, 'open',   0),
+(7, 8,  'Quiz SQL Queries',     'JOIN, subquery, aggregate functions',  15, 'open',   0),
+(8, 10, 'Quiz Giới thiệu LP',   'Khái niệm cơ bản lập trình',          8,  'closed', 0);
+
+-- ════════════════════════════════════════════
+-- 7b. QUIZ QUESTIONS
+-- ════════════════════════════════════════════
+INSERT INTO `quiz_questions`
+    (`id`, `quiz_id`, `question_text`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `points`, `order_num`)
+VALUES
+-- Quiz 1
+(1, 1, 'Thẻ nào dùng để in đậm chữ trong HTML?', '<b>', '<i>', '<u>', '<p>', 'A', 1.00, 1),
+(2, 1, 'Thuộc tính CSS nào đổi màu nền?', 'color', 'background-color', 'bg-color', 'font-color', 'B', 1.00, 2),
+-- Quiz 2
+(3, 2, 'Hàm nào dùng để tìm thẻ theo ID?', 'getElementById', 'querySelector', 'Cả A và B', 'getElementsByTagName', 'C', 1.00, 1),
+(4, 2, 'Sự kiện click chuột là?', 'onchange', 'onhover', 'onclick', 'onsubmit', 'C', 1.00, 2),
+-- Quiz 3
+(5, 3, 'Ký hiệu nào khai báo biến trong PHP?', '@', '&', '$', '#', 'C', 1.00, 1),
+(6, 3, 'Hàm nào in dữ liệu ra màn hình trong PHP?', 'print_r()', 'var_dump()', 'echo', 'Tất cả', 'D', 1.00, 2),
+-- Quiz 4
+(7, 4, 'Hình thoi trong ERD biểu diễn gì?', 'Thực thể', 'Mối quan hệ', 'Thuộc tính', 'Khóa chính', 'B', 1.00, 1),
+(8, 4, 'Khóa chính dùng để làm gì?', 'Phân biệt dòng', 'Tăng tốc', 'Liên kết', 'Lọc', 'A', 1.00, 2),
+-- Quiz 5
+(9, 5, 'Chuẩn 1NF yêu cầu gì?', 'Không nhóm lặp', 'Khóa chính', 'Nguyên tử', 'Tất cả', 'C', 1.00, 1),
+(10, 5, 'Chuẩn 2NF giải quyết gì?', 'Phụ thuộc một phần', 'Phụ thuộc bắc cầu', 'Lặp', 'Khóa ngoại', 'A', 1.00, 2),
+(11, 5, 'Đặc điểm 3NF là gì?', 'Không bắc cầu', 'Khóa ngoại', 'Không NULL', 'Chuẩn hóa', 'A', 1.00, 3),
+-- Quiz 8
+(12, 8, 'Thuật toán là gì?', 'Các bước giải quyết', 'Ngôn ngữ', 'Hệ điều hành', 'Dữ liệu', 'A', 1.00, 1),
+(13, 8, 'Lặp nào không kiểm tra điều kiện ngay?', 'while', 'do...while', 'for', 'foreach', 'B', 1.00, 2),
+-- Quiz 6 (Open)
+(14, 6, 'PDO là viết tắt của?', 'PHP Data Objects', 'PHP Database', 'Personal', 'Public', 'A', 1.00, 1),
+(15, 6, 'Hàm prepare PDO làm gì?', 'Chuẩn bị lệnh', 'Thực thi', 'Kết nối', 'Lọc', 'A', 1.00, 2),
+-- Quiz 7 (Open)
+(16, 7, 'JOIN lấy bảng bên trái là?', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'B', 1.00, 1),
+(17, 7, 'Hàm tính tổng?', 'COUNT()', 'SUM()', 'AVG()', 'MAX()', 'B', 1.00, 2);
 
 -- ════════════════════════════════════════════
 -- 8. QUIZ SUBMISSIONS
