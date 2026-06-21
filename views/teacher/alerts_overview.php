@@ -8,9 +8,9 @@ $alertTypeMap = [
     'low_engagement' => 'Low Engagement',
 ];
 $statusVN = [
-    'pending'  => 'Chờ xử lý',
-    'reviewed' => 'Đã xem',
-    'resolved' => 'Đã xử lý',
+    'pending'  => 'Pending',
+    'reviewed' => 'Reviewed',
+    'resolved' => 'Resolved',
 ];
 $statusBadge = [
     'pending'  => 'badge-warning',
@@ -46,45 +46,39 @@ foreach ($alerts as $a) {
     <div class="stat-icon" style="background:#FFF7ED">
       <svg fill="none" viewBox="0 0 24 24" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </div>
-    <div><div class="stat-value"><?= $pendingCount ?></div><div class="stat-label">Chờ xử lý</div></div>
+    <div><div class="stat-value"><?= $pendingCount ?></div><div class="stat-label">Pending</div></div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:#EFF6FF">
       <svg fill="none" viewBox="0 0 24 24" stroke="#2563EB" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
     </div>
-    <div><div class="stat-value"><?= $reviewedCount ?></div><div class="stat-label">Đã xem</div></div>
+    <div><div class="stat-value"><?= $reviewedCount ?></div><div class="stat-label">Reviewed</div></div>
   </div>
   <div class="card stat-card">
     <div class="stat-icon" style="background:#F0FDF4">
       <svg fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 10"/></svg>
     </div>
-    <div><div class="stat-value"><?= $resolvedCount ?></div><div class="stat-label">Đã xử lý</div></div>
+    <div><div class="stat-value"><?= $resolvedCount ?></div><div class="stat-label">Resolved</div></div>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <div>
-      <div class="card-title">Alerts Overview</div>
-      <div class="text-muted" style="font-size:13px;">Review and respond to attendance alerts from students.</div>
-    </div>
-  </div>
   <div class="card-body">
     <div class="table-wrap">
       <table class="table table-hover table-striped mb-0">
         <thead>
           <tr>
-            <th>Sinh viên</th>
-            <th>Mã SV</th>
-            <th>Môn</th>
-            <th>Loại</th>
-            <th>Nội dung</th>
-            <th>Trạng thái</th>
+            <th>Student</th>
+            <th>Student ID</th>
+            <th>Course</th>
+            <th>Type</th>
+            <th>Message</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
         <?php if (empty($alerts)): ?>
-        <tr><td colspan="6" class="text-center text-muted py-4">Không có alert nào.</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">No alerts found.</td></tr>
         <?php else: ?>
         <?php foreach ($alerts as $a): ?>
         <tr>
