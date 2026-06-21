@@ -4,30 +4,11 @@ $page_title = 'Attendance Methods';
 $active_nav = 'attendance';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
-<<<<<<< Updated upstream
-
-<div class="container mt-4">
-    <div class="admin-page-title">
-        <div class="left">
-            <h1>Attendance Methods</h1>
-            <p>Configure how students check in for this session.</p>
-        </div>
-        <div class="right">
-            <a href="<?php echo APP_URL; ?>/teacher/attendance/records_list.php?session_id=<?php echo $session['id']; ?>" class="btn btn-success me-2">
-                <i class="bi bi-list-check"></i> Điểm danh thủ công (Danh sách SV)
-            </a>
-            <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus"></i> Tạo Phương thức
-            </a>
-
-        </div>
-=======
  
 <div class="admin-page-title">
     <div class="left">
         <h1>Attendance Methods</h1>
         <p><?= htmlspecialchars($session['course_code']) ?> &middot; <?= date('d/m/Y', strtotime($session['session_date'])) ?> &middot; <?= htmlspecialchars($session['title'] ?? 'No session title') ?> &middot; <?= date('H:i', strtotime($session['start_time'])) ?>&ndash;<?= date('H:i', strtotime($session['end_time'])) ?></p>
->>>>>>> Stashed changes
     </div>
     <div class="right">
         <a href="<?= APP_URL ?>/teacher/attendance/methods_form.php?session_id=<?= (int)$session['id'] ?>" class="btn btn-primary btn-sm">
@@ -81,12 +62,30 @@ require_once APP_ROOT . '/views/layouts/header.php';
                               </span>
                           </td>
                           <td>
-                              <?php if ($method['token']): ?>
-                                  <code><?= htmlspecialchars(substr($method['token'], 0, 12) . '...') ?></code>
-                              <?php else: ?>
-                                  <span class="text-muted">&ndash;</span>
-                              <?php endif; ?>
-                          </td>
+
+<?php if ($method['method_type'] === 'qr' && $method['token']): ?>
+
+<img
+    src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?= urlencode($method['token']) ?>"
+    width="90"
+    alt="QR Code">
+
+<br>
+<small><?= htmlspecialchars(substr($method['token'],0,8)) ?>...</small>
+
+<?php elseif ($method['token']): ?>
+
+<code>
+<?= htmlspecialchars(substr($method['token'],0,12)) ?>...
+</code>
+
+<?php else: ?>
+
+<span class="text-muted">-</span>
+
+<?php endif; ?>
+
+</td>
                           <td>
                               <?= $method['expires_at'] ? date('d/m/Y H:i', strtotime($method['expires_at'])) : '<span class="text-muted">&ndash;</span>' ?>
                           </td>
