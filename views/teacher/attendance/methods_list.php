@@ -1,38 +1,49 @@
 <?php
 // views/teacher/attendance/methods_list.php
+$page_title = 'Attendance Methods';
+$active_nav = 'attendance';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2>Phương thức Điểm danh - <?php echo htmlspecialchars($session['course_code']); ?></h2>
-            <p class="text-muted">Buổi: <?php echo date('d/m/Y H:i', strtotime($session['session_date'] . ' ' . $session['start_time'])); ?></p>
+    <div class="admin-page-title">
+        <div class="left">
+            <h1>Attendance Methods</h1>
+            <p>Configure how students check in for this session.</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary">
+        <div class="right">
+            <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus"></i> Tạo Phương thức
             </a>
         </div>
     </div>
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
     <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+      <div class="card-header">
+        <div>
+          <div class="card-title"><?php echo htmlspecialchars($session['course_code']); ?> • Buổi ngày <?php echo date('d/m/Y', strtotime($session['session_date'])); ?></div>
+          <div class="text-muted" style="font-size:13px;"><?php echo htmlspecialchars($session['title'] ?? 'No session title'); ?> • <?php echo date('H:i', strtotime($session['start_time'])); ?> – <?php echo date('H:i', strtotime($session['end_time'])); ?></div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <?php if (isset($_SESSION['success'])): ?>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+              <button type="button" class="btn-close"></button>
+          </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+              <button type="button" class="btn-close"></button>
+          </div>
+        <?php endif; ?>
+
+        <div class="table-wrap">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Loại</th>
@@ -93,6 +104,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
                 </tbody>
             </table>
         </div>
+      </div>
     </div>
 
     <div class="mt-3">
