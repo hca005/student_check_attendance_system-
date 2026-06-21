@@ -45,10 +45,11 @@ foreach ($courses as &$c) {
     )->fetchColumn();
 
     $c['present_count'] = (int)$db->query(
-        "SELECT COUNT(*) FROM attendance_records ar
-         JOIN class_sessions cs ON ar.session_id = cs.id
-         WHERE cs.course_id = ? AND ar.student_id = ? AND ar.status = 'present'",
-        [$cid, $studentId]
+        "SELECT COUNT(DISTINCT ar.session_id) FROM attendance_records ar
+        JOIN class_sessions cs ON ar.session_id = cs.id
+        WHERE cs.course_id = ? AND ar.student_id = ? AND ar.status = 'present'
+            AND cs.status = 'ended'",
+         [$cid, $studentId]
     )->fetchColumn();
 
     $c['quiz_count'] = (int)$db->query(
@@ -66,7 +67,7 @@ foreach ($courses as &$c) {
     )->fetchColumn() ?: 0);
 
     $c['att_pct'] = $c['ended_sessions'] > 0
-        ? round($c['present_count'] / $c['ended_sessions'] * 100)
+        ? min(100, round($c['present_count'] / $c['ended_sessions'] * 100))
         : 0;
 
     // Không có cột description trong schema → để trống
