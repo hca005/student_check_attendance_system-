@@ -170,7 +170,7 @@ class QuizSessionModel
     // ──────────────────────────────────────────────────────
     // HELPER – Lấy tất cả quiz open trong course
     // ──────────────────────────────────────────────────────
-    public function getOpenQuizzesByCoursId(int $courseId): array
+    public function getOpenQuizzesByCourseId(int $courseId): array
     {
         $stmt = $this->db->prepare(
             'SELECT qs.id, qs.title, qs.session_id, cs.session_date

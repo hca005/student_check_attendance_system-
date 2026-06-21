@@ -100,7 +100,7 @@ class AttendanceRecordModel
     // ──────────────────────────────────────────────────────
     public function update(int $id, array $data): bool
     {
-        $allowedFields = ['status', 'checked_in_at', 'method_id', 'note'];
+        $allowedFields = ['status', 'checked_in_at', 'method_id', 'note', 'verified_by'];
         $updates = [];
         $values = [];
 
