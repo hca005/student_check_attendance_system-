@@ -31,6 +31,7 @@ TRUNCATE TABLE `engagement_scores`;
 TRUNCATE TABLE `engagement_rules`;
 TRUNCATE TABLE `interaction_logs`;
 TRUNCATE TABLE `quiz_submissions`;
+TRUNCATE TABLE `quiz_questions`;
 TRUNCATE TABLE `quiz_sessions`;
 TRUNCATE TABLE `attendance_records`;
 TRUNCATE TABLE `attendance_methods`;
@@ -228,6 +229,38 @@ VALUES
 (6, 4,  'Quiz MySQL & PDO',     'Truy vấn SQL nâng cao và PDO',        15, 'open',   0),
 (7, 8,  'Quiz SQL Queries',     'JOIN, subquery, aggregate functions',  15, 'open',   0),
 (8, 10, 'Quiz Giới thiệu LP',   'Khái niệm cơ bản lập trình',          8,  'closed', 0);
+
+-- ════════════════════════════════════════════
+-- 7b. QUIZ QUESTIONS
+-- ════════════════════════════════════════════
+INSERT INTO `quiz_questions`
+    (`id`, `quiz_id`, `question_text`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `points`, `order_num`)
+VALUES
+-- Quiz 1
+(1, 1, 'Thẻ nào dùng để in đậm chữ trong HTML?', '<b>', '<i>', '<u>', '<p>', 'A', 1.00, 1),
+(2, 1, 'Thuộc tính CSS nào đổi màu nền?', 'color', 'background-color', 'bg-color', 'font-color', 'B', 1.00, 2),
+-- Quiz 2
+(3, 2, 'Hàm nào dùng để tìm thẻ theo ID?', 'getElementById', 'querySelector', 'Cả A và B', 'getElementsByTagName', 'C', 1.00, 1),
+(4, 2, 'Sự kiện click chuột là?', 'onchange', 'onhover', 'onclick', 'onsubmit', 'C', 1.00, 2),
+-- Quiz 3
+(5, 3, 'Ký hiệu nào khai báo biến trong PHP?', '@', '&', '$', '#', 'C', 1.00, 1),
+(6, 3, 'Hàm nào in dữ liệu ra màn hình trong PHP?', 'print_r()', 'var_dump()', 'echo', 'Tất cả', 'D', 1.00, 2),
+-- Quiz 4
+(7, 4, 'Hình thoi trong ERD biểu diễn gì?', 'Thực thể', 'Mối quan hệ', 'Thuộc tính', 'Khóa chính', 'B', 1.00, 1),
+(8, 4, 'Khóa chính dùng để làm gì?', 'Phân biệt dòng', 'Tăng tốc', 'Liên kết', 'Lọc', 'A', 1.00, 2),
+-- Quiz 5
+(9, 5, 'Chuẩn 1NF yêu cầu gì?', 'Không nhóm lặp', 'Khóa chính', 'Nguyên tử', 'Tất cả', 'C', 1.00, 1),
+(10, 5, 'Chuẩn 2NF giải quyết gì?', 'Phụ thuộc một phần', 'Phụ thuộc bắc cầu', 'Lặp', 'Khóa ngoại', 'A', 1.00, 2),
+(11, 5, 'Đặc điểm 3NF là gì?', 'Không bắc cầu', 'Khóa ngoại', 'Không NULL', 'Chuẩn hóa', 'A', 1.00, 3),
+-- Quiz 8
+(12, 8, 'Thuật toán là gì?', 'Các bước giải quyết', 'Ngôn ngữ', 'Hệ điều hành', 'Dữ liệu', 'A', 1.00, 1),
+(13, 8, 'Lặp nào không kiểm tra điều kiện ngay?', 'while', 'do...while', 'for', 'foreach', 'B', 1.00, 2),
+-- Quiz 6 (Open)
+(14, 6, 'PDO là viết tắt của?', 'PHP Data Objects', 'PHP Database', 'Personal', 'Public', 'A', 1.00, 1),
+(15, 6, 'Hàm prepare PDO làm gì?', 'Chuẩn bị lệnh', 'Thực thi', 'Kết nối', 'Lọc', 'A', 1.00, 2),
+-- Quiz 7 (Open)
+(16, 7, 'JOIN lấy bảng bên trái là?', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'B', 1.00, 1),
+(17, 7, 'Hàm tính tổng?', 'COUNT()', 'SUM()', 'AVG()', 'MAX()', 'B', 1.00, 2);
 
 -- ════════════════════════════════════════════
 -- 8. QUIZ SUBMISSIONS
