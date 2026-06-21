@@ -12,9 +12,13 @@ require_once APP_ROOT . '/views/layouts/header.php';
             <p>Configure how students check in for this session.</p>
         </div>
         <div class="right">
+            <a href="<?php echo APP_URL; ?>/teacher/attendance/records_list.php?session_id=<?php echo $session['id']; ?>" class="btn btn-success me-2">
+                <i class="bi bi-list-check"></i> Điểm danh thủ công (Danh sách SV)
+            </a>
             <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus"></i> Tạo Phương thức
             </a>
+
         </div>
     </div>
 

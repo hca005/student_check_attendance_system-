@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * public/student/attendance.php
  * Route cho trang điểm danh của student
@@ -28,6 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'checkin') {
 
     $otp       = strtoupper(trim($_POST['otp_code'] ?? ''));
     $sessionId = (int)($_POST['session_id'] ?? 0);
+
+    if (!Middleware::isFromCampusWiFi()) {
+        echo json_encode(['success' => false, 'message' => 'Cảnh báo: Bạn phải kết nối mạng WiFi của trường (Campus Network) để điểm danh!']);
+        exit;
+    }
 
     if (!$otp || !$sessionId) {
         echo json_encode(['success' => false, 'message' => 'Vui lòng nhập mã OTP và chọn buổi học.']);

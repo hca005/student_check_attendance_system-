@@ -200,4 +200,4 @@ document.addEventListener('click', function(event) {
 </script>
 
 <!-- PAGE CONTENT STARTS BELOW -->
-<div class="page-content">
+<div class="page-content" <?= $role === 'admin' ? 'style="background: #eff6ff; min-height: 100vh;"' : '' ?>>
