@@ -46,6 +46,29 @@ if (!defined('DEFAULT_DISCUSSION_SCORE')) {
     define('DEFAULT_DISCUSSION_SCORE', 1.00);
 }
 
+// ── WIFI / IP RESTRICTION CONFIGURATION ──────────────────────
+if (!defined('ENABLE_WIFI_RESTRICTION')) {
+    define('ENABLE_WIFI_RESTRICTION', true); // Toggle functionality
+}
+if (!defined('ALLOWED_CAMPUS_IPS')) {
+    // Defines allowed IP ranges. Uses basic wildcard matching.
+    define('ALLOWED_CAMPUS_IPS', [
+        '127.0.0.1',    // Localhost
+        '::1',          // Localhost IPv6
+        '192.168.*.*',  // Common Private Network
+        '10.0.*.*'      // Common Private Network
+    ]);
+}
+
+// ── N8N AUTOMATION CONFIGURATION ─────────────────────────────
+if (!defined('ENABLE_N8N_EMAILS')) {
+    define('ENABLE_N8N_EMAILS', true); // Toggle N8N Webhook integration
+}
+if (!defined('N8N_WEBHOOK_URL')) {
+    // Replace this with your actual n8n Test/Production Webhook URL
+    define('N8N_WEBHOOK_URL', 'http://localhost:5678/webhook/pPZxSRNeIua6fR6s/webhook%2520php/student-alerts');
+}
+
 if (!defined('APP_ENV')) {
     define('APP_ENV', 'development');
 }

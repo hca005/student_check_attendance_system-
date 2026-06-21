@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../config/database.php';
+require_once APP_ROOT . '/models/AlertLogModel.php';
+require_once APP_ROOT . '/helpers/N8nEmailService.php';
 require_once __DIR__ . '/../helpers/middleware.php';
 
 class AdminMonitoringController
@@ -92,7 +94,9 @@ class AdminMonitoringController
         ];
 
         $barData = $this->db->query(
-            "SELECT c.course_code, ROUND(AVG(es.engagement_index), 0) AS avg_score
+            "SELECT c.course_code, 
+                    ROUND(AVG(es.engagement_index), 0) AS avg_score,
+                    ROUND(SUM(es.attended_sessions) / NULLIF(SUM(es.total_sessions), 0) * 100, 0) AS attendance_rate
              FROM engagement_scores es
              JOIN courses c ON c.id = es.course_id
              GROUP BY c.id, c.course_code
@@ -101,9 +105,9 @@ class AdminMonitoringController
         )->fetchAll(PDO::FETCH_ASSOC);
         if (!$barData) {
             $barData = [
-                ['course_code' => 'W1', 'avg_score' => 0],
-                ['course_code' => 'W2', 'avg_score' => 0],
-                ['course_code' => 'W3', 'avg_score' => 0],
+                ['course_code' => 'W1', 'avg_score' => 0, 'attendance_rate' => 0],
+                ['course_code' => 'W2', 'avg_score' => 0, 'attendance_rate' => 0],
+                ['course_code' => 'W3', 'avg_score' => 0, 'attendance_rate' => 0],
             ];
         }
 
@@ -279,16 +283,19 @@ class AdminMonitoringController
 
         $rows = $this->db->query(
             "SELECT
-                es.student_id,
-                es.course_id,
-                es.total_sessions,
-                es.attended_sessions,
-                es.engagement_index,
+                e.user_id AS student_id,
+                e.course_id,
+                COALESCE(es.engagement_index, 0) AS engagement_index,
                 c.course_code,
+                c.low_engagement_threshold,
                 c.absence_threshold,
-                c.low_engagement_threshold
-             FROM engagement_scores es
-             JOIN courses c ON c.id = es.course_id"
+                u.email,
+                u.full_name
+             FROM enrollments e
+             JOIN courses c ON c.id = e.course_id
+             JOIN users u ON u.id = e.user_id
+             LEFT JOIN engagement_scores es ON es.student_id = e.user_id AND es.course_id = e.course_id
+             WHERE e.role = 'student'"
         )->fetchAll(PDO::FETCH_ASSOC);
 
         $insertStmt = $this->db->prepare(
@@ -301,8 +308,10 @@ class AdminMonitoringController
         );
 
         $created = 0;
+        $absStmt = $this->db->prepare("SELECT COUNT(*) FROM attendance_records ar JOIN class_sessions cs ON ar.session_id = cs.id WHERE cs.course_id = ? AND ar.student_id = ? AND ar.status = 'absent'");
         foreach ($rows as $row) {
-            $absenceCount = max(0, (int)$row['total_sessions'] - (int)$row['attended_sessions']);
+            $absStmt->execute([$row['course_id'], $row['student_id']]);
+            $absenceCount = (int)$absStmt->fetchColumn();
             $threshold = (int)$row['absence_threshold'];
             if ($threshold > 0 && $absenceCount >= $threshold) {
                 $existsStmt->execute([$row['student_id'], $row['course_id'], 'low_attendance']);
@@ -310,6 +319,15 @@ class AdminMonitoringController
                     $message = "Attendance risk detected in {$row['course_code']}: {$absenceCount} absences vượt ngưỡng {$threshold} buổi.";
                     $insertStmt->execute([$row['student_id'], $row['course_id'], 'low_attendance', $message, 'high']);
                     $created++;
+                    
+                    N8nEmailService::sendAlertWebhook(
+                        $row['email'],
+                        $row['full_name'],
+                        $row['course_code'],
+                        'low_attendance',
+                        $message,
+                        'high'
+                    );
                 }
             }
 
@@ -320,6 +338,15 @@ class AdminMonitoringController
                     $message = "Low engagement detected in {$row['course_code']}: score {$row['engagement_index']} dưới ngưỡng {$lowThreshold}.";
                     $insertStmt->execute([$row['student_id'], $row['course_id'], 'low_engagement', $message, 'medium']);
                     $created++;
+                    
+                    N8nEmailService::sendAlertWebhook(
+                        $row['email'],
+                        $row['full_name'],
+                        $row['course_code'],
+                        'low_engagement',
+                        $message,
+                        'medium'
+                    );
                 }
             }
         }

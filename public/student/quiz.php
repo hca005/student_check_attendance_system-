@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * public/student/quiz.php
  * Route cho quiz: danh sách, làm bài, nộp bài
@@ -25,6 +25,11 @@ $action    = $_GET['action'] ?? '';
 // ── AJAX: Nộp bài quiz ──────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
     header('Content-Type: application/json; charset=utf-8');
+
+    if (!Middleware::isFromCampusWiFi()) {
+        echo json_encode(['success' => false, 'message' => 'Cảnh báo: Bạn phải kết nối mạng WiFi của trường (Campus Network) để nộp bài!']);
+        exit;
+    }
 
     $quizId = (int)($_POST['quiz_id'] ?? 0);
     $subModel = new QuizSubmissionModel();
@@ -96,6 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'submit') {
 if ($action === 'take') {
     $quizId = (int)($_GET['quiz_id'] ?? 0);
     $subModel = new QuizSubmissionModel();
+
+    if (!Middleware::isFromCampusWiFi()) {
+        header('Location: ' . APP_URL . '/student/quiz.php?msg=wifi_required');
+        exit;
+    }
 
     $quiz = $db->query('SELECT * FROM quiz_sessions WHERE id=? LIMIT 1', [$quizId])->fetch();
     if (!$quiz || $quiz['status'] !== 'open') {

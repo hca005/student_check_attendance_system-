@@ -195,9 +195,9 @@ class UserController
             $stmt = $db->prepare("
                 SELECT 
                     COUNT(*) as total_sessions,
-                    SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
-                    SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count,
-                    SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count
+                    SUM(CASE WHEN ar.status = 'present' THEN 1 ELSE 0 END) as present_count,
+                    SUM(CASE WHEN ar.status = 'late' THEN 1 ELSE 0 END) as late_count,
+                    SUM(CASE WHEN ar.status = 'absent' THEN 1 ELSE 0 END) as absent_count
                 FROM attendance_records ar
                 JOIN class_sessions cs ON ar.session_id = cs.id
                 WHERE ar.student_id = ?
@@ -207,7 +207,7 @@ class UserController
 
             // Fetch history
             $stmt2 = $db->prepare("
-                SELECT c.course_name, cs.title, cs.session_date, ar.status, ar.recorded_at
+                SELECT c.course_name, cs.title, cs.session_date, ar.status, ar.created_at as recorded_at
                 FROM attendance_records ar
                 JOIN class_sessions cs ON ar.session_id = cs.id
                 JOIN courses c ON cs.course_id = c.id

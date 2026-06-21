@@ -7,6 +7,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
 $msgMap = [
   'already_submitted' => 'You have already submitted this quiz.',
   'quiz_closed'       => 'This quiz is closed or no longer exists.',
+  'wifi_required'     => 'Warning: You must be connected to the campus WiFi network to take this quiz!',
 ];
 $flashText = $msgMap[$_GET['msg'] ?? ''] ?? null;
 ?>

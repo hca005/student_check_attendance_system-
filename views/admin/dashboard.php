@@ -106,7 +106,14 @@ function activity_label(string $type): string
         <?php foreach ($recentActivities as $row): ?>
           <tr>
             <td><?= htmlspecialchars((string)$row['full_name']) ?></td>
-            <td><span class="badge badge-primary"><?= htmlspecialchars(activity_label((string)$row['action_type'])) ?></span></td>
+            <td>
+              <?php 
+                $lbl = activity_label((string)$row['action_type']);
+                $bg = $lbl === 'Logged Attendance' ? '#e0e7ff' : '#f3e8ff';
+                $color = $lbl === 'Logged Attendance' ? '#4338ca' : '#7e22ce';
+              ?>
+              <span class="badge" style="background: <?= $bg ?>; color: <?= $color ?>; border: none; font-weight: 600;"><?= htmlspecialchars($lbl) ?></span>
+            </td>
             <td><?= htmlspecialchars((string)($row['course_code'] ?: 'N/A')) ?></td>
             <td><?= htmlspecialchars(date('H:i', strtotime((string)$row['created_at']))) ?></td>
           </tr>
@@ -119,19 +126,28 @@ function activity_label(string $type): string
     </div>
   </div>
 
-  <div class="card dashboard-right-card">
-    <div style="font-size:11px;opacity:.8;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Upcoming Session</div>
-    <?php if ($upcoming): ?>
-      <div style="font-size:18px;font-weight:800;margin-top:8px;line-height:1.3"><?= htmlspecialchars((string)($upcoming['title'] ?: 'Class Session')) ?></div>
-      <div style="font-size:13px;margin-top:6px;opacity:.92"><?= htmlspecialchars((string)$upcoming['course_name']) ?></div>
-      <div style="font-size:12px;margin-top:10px;opacity:.88">
-        <?= htmlspecialchars((string)$upcoming['session_date']) ?> |
-        <?= substr((string)$upcoming['start_time'], 0, 5) ?> - <?= substr((string)$upcoming['end_time'], 0, 5) ?>
-      </div>
-    <?php else: ?>
-      <div style="font-size:14px;margin-top:10px;opacity:.9">No upcoming sessions scheduled.</div>
-    <?php endif; ?>
-    <a href="<?= APP_URL ?>/index.php?page=admin_sessions" class="btn btn-sm" style="margin-top:14px;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff">Monitor Real-time</a>
+  <div class="card dashboard-right-card" style="position: relative; overflow: hidden; background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%); padding-bottom: 24px;">
+    <!-- Cloud SVG Effect -->
+    <svg style="position: absolute; top: -10px; right: -20px; width: 140px; height: 140px; color: rgba(255,255,255,0.15); transform: scale(1.3);" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M6.5 17.5a4.5 4.5 0 01-.47-8.975 6 6 0 0111.41-1.39A5.5 5.5 0 0117.5 17.5h-11z" />
+    </svg>
+
+    <div style="position: relative; z-index: 1;">
+      <div style="font-size:11px;opacity:.9;text-transform:uppercase;font-weight:800;letter-spacing:.06em;color:#fff;">Upcoming Session</div>
+      <?php if ($upcoming): ?>
+        <div style="font-size:18px;font-weight:800;margin-top:8px;line-height:1.3;color:#fff;"><?= htmlspecialchars((string)($upcoming['title'] ?: 'Class Session')) ?></div>
+        <span style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); color: #fff; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; display: inline-block; margin-top: 6px;">Đang diễn ra</span>
+        <div style="font-size:13px;margin-top:12px;opacity:.95;color:#fff;font-weight:500;"><?= htmlspecialchars((string)$upcoming['course_name']) ?></div>
+        <div style="font-size:12px;margin-top:10px;opacity:.9;color:#fff;display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+          <?= htmlspecialchars((string)$upcoming['session_date']) ?> |
+          <?= substr((string)$upcoming['start_time'], 0, 5) ?> - <?= substr((string)$upcoming['end_time'], 0, 5) ?>
+        </div>
+      <?php else: ?>
+        <div style="font-size:14px;margin-top:10px;opacity:.9;color:#fff;">No upcoming sessions scheduled.</div>
+      <?php endif; ?>
+      <a href="<?= APP_URL ?>/index.php?page=admin_sessions" class="btn btn-sm" style="margin-top:20px;background:#fff;color:#1d4ed8;font-weight:700;display:flex;justify-content:center;padding:10px 0;border-radius:6px;text-decoration:none;">Monitor Real-time &rarr;</a>
+    </div>
   </div>
 </div>
 

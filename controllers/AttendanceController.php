@@ -196,8 +196,35 @@ class AttendanceController
 
         $this->verifyTeacherOwnsSession($sessionId);
 
-        $records = $this->recordModel->getBySessionId($sessionId);
         $session = $this->getSessionInfo($sessionId);
+        
+        if ($session) {
+            $courseId = $session['course_id'];
+            
+            // 1. Lấy tất cả user_id đã Enroll vào môn học này
+            $stmt = $this->db->prepare("SELECT user_id FROM enrollments WHERE course_id = ?");
+            $stmt->execute([$courseId]);
+            $enrolledStudents = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // 2. Lấy các student_id ĐÃ CÓ trong bảng attendance_records của buổi học này
+            $stmt = $this->db->prepare("SELECT student_id FROM attendance_records WHERE session_id = ?");
+            $stmt->execute([$sessionId]);
+            $recordedStudents = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // 3. Tìm các sinh viên chưa có tên trong danh sách điểm danh
+            $missingStudents = array_diff($enrolledStudents, $recordedStudents);
+            
+            // 4. Tự động thêm họ vào danh sách với trạng thái mặc định là 'absent' (Vắng mặt)
+            if (!empty($missingStudents)) {
+                $insertSql = "INSERT INTO attendance_records (session_id, student_id, status, created_at, updated_at) VALUES (?, ?, 'absent', NOW(), NOW())";
+                $insertStmt = $this->db->prepare($insertSql);
+                foreach ($missingStudents as $studentId) {
+                    $insertStmt->execute([$sessionId, $studentId]);
+                }
+            }
+        }
+
+        $records = $this->recordModel->getBySessionId($sessionId);
 
         require_once APP_ROOT . '/views/teacher/attendance/records_list.php';
     }
@@ -276,7 +303,7 @@ class AttendanceController
     private function getSessionInfo(int $sessionId): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT cs.id, cs.session_date, cs.start_time, cs.end_time, cs.title, cs.status,
+            'SELECT cs.id, cs.course_id, cs.session_date, cs.start_time, cs.end_time, cs.title, cs.status,
                     c.course_code, c.course_name
              FROM class_sessions cs
              JOIN courses c ON cs.course_id = c.id
