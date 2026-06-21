@@ -31,15 +31,14 @@ $active_nav = 'dashboard';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<div class="container mt-4">
-  <div class="admin-page-title">
-    <div class="left">
-      <h1>Teacher Dashboard</h1>
-      <p>Overview of your courses and classroom activity.</p>
-    </div>
+<div class="admin-page-title">
+  <div class="left">
+    <h1>Teacher Dashboard</h1>
+    <p>Overview of your courses and classroom activity.</p>
   </div>
+</div>
 
-  <div class="stat-cards">
+<div class="stat-cards">
   <div class="card stat-card">
     <div class="stat-icon" style="background:#EFF6FF">
       <svg fill="none" viewBox="0 0 24 24" stroke="#2563EB" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -84,7 +83,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       Take Attendance
     </a>
-    <a href="<?= APP_URL ?>/teacher/quiz.php?action=create" class="btn btn-sm" style="background:#F59E0B;color:#fff">
+    <a href="<?= APP_URL ?>/teacher/quiz.php?action=create" class="btn btn-warning btn-sm">
       <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
       Create Quiz
     </a>
@@ -115,8 +114,8 @@ require_once APP_ROOT . '/views/layouts/header.php';
         <td><span class="badge <?= $statusCls[$s['status']] ?? 'badge-gray' ?>"><?= ucfirst($s['status']) ?></span></td>
         <td>
           <div style="display:flex;gap:6px">
-            <a href="<?= APP_URL ?>/teacher/attendance.php?session_id=<?= $s['id'] ?>" class="btn btn-outline-secondary btn-sm">Attendance</a>
-            <a href="<?= APP_URL ?>/teacher/quiz.php?session_id=<?= $s['id'] ?>" class="btn btn-sm" style="background:#F1F5F9;color:#374151">Quiz</a>
+            <a href="<?= APP_URL ?>/teacher/attendance.php?session_id=<?= (int)$s['id'] ?>" class="btn btn-outline-secondary btn-sm">Attendance</a>
+            <a href="<?= APP_URL ?>/teacher/quiz.php?session_id=<?= (int)$s['id'] ?>" class="btn btn-light btn-sm">Quiz</a>
           </div>
         </td>
       </tr>
@@ -143,7 +142,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
   <div style="font-size:12px;color:#94A3B8;margin-bottom:16px"><?= $stuCount ?> students · <?= $sesCount ?> sessions</div>
   <div style="display:flex;gap:8px">
     <a href="<?= APP_URL ?>/teacher/sessions.php?course_id=<?= $c['id'] ?>" class="btn btn-outline btn-sm" style="flex:1;justify-content:center">Sessions</a>
-    <a href="<?= APP_URL ?>/teacher/engagement.php?course_id=<?= $c['id'] ?>" class="btn btn-sm" style="flex:1;background:#F1F5F9;color:#374151;justify-content:center">Engagement</a>
+    <a href="<?= APP_URL ?>/teacher/engagement.php?course_id=<?= $c['id'] ?>" class="btn btn-light btn-sm" style="flex:1;justify-content:center">Engagement</a>
   </div>
 </div>
 <?php endforeach; ?>

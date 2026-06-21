@@ -175,7 +175,23 @@ a {
 .mt-4 {
   margin-top: 24px;
 }
+.mt-2 { margin-top: 10px; }
+.mb-0 { margin-bottom: 0; }
+.d-block { display: block; }
+.flex-wrap { flex-wrap: wrap; }
+.py-4 { padding-top: 24px; padding-bottom: 24px; }
+.text-center { text-align: center; }
 
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.justify-content-center.row,
+.row.justify-content-center { justify-content: center; }
 .small {
   font-size: 12px;
 }
@@ -292,7 +308,15 @@ a {
 .btn-primary:hover {
   background: var(--primary-dark);
 }
-
+.btn-danger:hover { background: #dc2626; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: #0ea271; }
+.btn-warning { background: var(--warning); color: #fff; }
+.btn-warning:hover { background: #d97706; }
+.btn-secondary { background: #64748b; color: #fff; }
+.btn-secondary:hover { background: #475569; }
+.btn-light { background: #f1f5f9; color: #334155; }
+.btn-light:hover { background: #e2e8f0; }
 .btn-outline {
   border-color: #cbd5e1;
   color: #334155;
@@ -363,7 +387,15 @@ a {
 .alert-danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
 .alert-warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 .alert-info { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.alert-dismissible {
+  position: relative;
+  justify-content: space-between;
+}
 
+.alert-dismissible .btn-close {
+  margin-left: auto;
+  flex-shrink: 0;
+}
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -516,7 +548,37 @@ tbody tr:last-child td {
   color: var(--text-muted);
   font-size: 13px;
 }
+.admin-page-title .right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
 
+/* Card header used inside .card blocks (title + optional action area) */
+.card-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card-header .right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  margin: 0 0 2px;
+}
 .admin-toolbar {
   padding: 14px;
   margin-bottom: 16px;
