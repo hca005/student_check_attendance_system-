@@ -2,7 +2,7 @@
 $page_title = 'Engagement Overview';
 $active_nav = 'engagement';
 require_once APP_ROOT . '/views/layouts/header.php';
-
+ 
 $avgIndex = 0;
 $riskCount = 0; $mediumCount = 0; $goodCount = 0;
 if (!empty($scores)) {
@@ -16,7 +16,7 @@ if (!empty($scores)) {
     }
     $avgIndex = round($sum / count($scores), 1);
 }
-
+ 
 function engagement_badge_class(float $idx): string
 {
     if ($idx >= 70) return 'badge-success';
@@ -33,7 +33,7 @@ function engagement_badge_class(float $idx): string
     <a href="<?= APP_URL ?>/teacher/dashboard.php" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
   </div>
 </div>
-
+ 
 <div class="stat-cards">
   <div class="card stat-card">
     <div class="stat-icon" style="background:#EFF6FF">
@@ -60,30 +60,24 @@ function engagement_badge_class(float $idx): string
     <div><div class="stat-value"><?= $riskCount ?></div><div class="stat-label">At Risk (&lt;40)</div></div>
   </div>
 </div>
-
+ 
 <div class="card">
-  <div class="card-header">
-    <div>
-      <div class="card-title">Engagement Overview</div>
-      <div class="text-muted" style="font-size:13px;">Student participation and performance summary.</div>
-    </div>
-  </div>
   <div class="card-body">
     <div class="table-wrap">
       <table class="table table-hover table-striped mb-0">
         <thead>
           <tr>
-            <th>Sinh viên</th>
-            <th>Mã SV</th>
-            <th>Môn</th>
-            <th>Buổi tham gia</th>
+            <th>Student</th>
+            <th>Student ID</th>
+            <th>Course</th>
+            <th>Sessions Attended</th>
             <th>Quiz Score</th>
             <th>Engagement Index</th>
           </tr>
         </thead>
         <tbody>
         <?php if (empty($scores)): ?>
-        <tr><td colspan="6" class="text-center text-muted py-4">Chưa có dữ liệu engagement.</td></tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">No engagement data yet.</td></tr>
         <?php else: ?>
         <?php foreach ($scores as $s):
             $idx = (float)$s['engagement_index'];
