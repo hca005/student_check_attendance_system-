@@ -59,12 +59,6 @@ $statusBadge = [
 </div>
 
 <div class="card">
-  <div class="card-header">
-    <div>
-      <div class="card-title">Class Sessions</div>
-      <div class="text-muted" style="font-size:13px;">All sessions across your assigned courses.</div>
-    </div>
-  </div>
   <div class="card-body" style="padding:0;">
     <div class="table-wrap">
       <table class="table table-hover table-striped mb-0">
@@ -85,7 +79,7 @@ $statusBadge = [
           <?php foreach ($sessions as $s): ?>
           <tr>
             <td style="font-weight:600"><?= htmlspecialchars(date('d/m/Y', strtotime($s['session_date']))) ?></td>
-            <td><?= htmlspecialchars($s['title'] ?? 'Buổi học') ?></td>
+            <td><?= htmlspecialchars($s['title'] ?? 'Session') ?></td>
             <td><span class="badge badge-primary"><?= htmlspecialchars($s['course_name']) ?></span></td>
             <td><span class="badge <?= $statusBadge[$s['status']] ?? 'badge-gray' ?>"><?= ucfirst(htmlspecialchars($s['status'])) ?></span></td>
             <td><a href="<?= APP_URL ?>/teacher/attendance/methods_list.php?session_id=<?= (int)$s['id'] ?>" class="btn btn-sm btn-primary">Attendance</a></td>
