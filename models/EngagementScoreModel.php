@@ -1,9 +1,8 @@
 <?php
 // ============================================================
-// models/EngagementScoreModel.php  (PHIÊN BẢN HOÀN CHỈNH)
+// models/EngagementScoreModel.php  
 // Tổng hợp và tính điểm tham gia lớp học
 // Repository Pattern + Business Logic
-// Thành viên 3 phụ trách
 // ============================================================
 
 require_once APP_ROOT . '/config/Database.php';
@@ -140,11 +139,12 @@ class EngagementScoreModel
         $stmtTotal->execute([$courseId]);
         $totalSessions = (int) $stmtTotal->fetchColumn();
 
-        // 2. Số buổi present
+        // 2. Số buổi present (chỉ tính buổi đã 'ended', loại trùng theo session_id)
         $stmtAtt = $this->db->prepare(
-            "SELECT COUNT(*) FROM attendance_records ar
+            "SELECT COUNT(DISTINCT ar.session_id) FROM attendance_records ar
              JOIN class_sessions cs ON ar.session_id = cs.id
-             WHERE cs.course_id = ? AND ar.student_id = ? AND ar.status = 'present'"
+             WHERE cs.course_id = ? AND ar.student_id = ? AND ar.status = 'present'
+               AND cs.status = 'ended'"
         );
         $stmtAtt->execute([$courseId, $studentId]);
         $attendedSessions = (int) $stmtAtt->fetchColumn();
@@ -174,7 +174,7 @@ class EngagementScoreModel
         $totalInter = (float) $stmtInter->fetchColumn();
 
         // 5. Tính tỷ lệ
-        $attRate   = $totalSessions > 0 ? ($attendedSessions / $totalSessions) : 0;
+        $attRate   = $totalSessions > 0 ? min(1, $attendedSessions / $totalSessions) : 0;
         $quizRate  = $maxQuiz       > 0 ? ($totalQuiz / $maxQuiz)              : 0;
         $interCeil = max(1, $totalSessions * 5);
         $interRate = min(1, $totalInter / $interCeil);

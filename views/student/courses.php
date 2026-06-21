@@ -22,7 +22,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
 <?php else:
   $totalAttended = array_sum(array_column($courses, 'present_count'));
   $totalSessions = array_sum(array_column($courses, 'ended_sessions'));
-  $overallPct    = $totalSessions > 0 ? round($totalAttended / $totalSessions * 100) : 0;
+  $overallPct    = $totalSessions > 0 ? min(100, round($totalAttended / $totalSessions * 100)) : 0;
   $avgEngage     = count($courses) ? round(array_sum(array_column($courses,'engagement')) / count($courses), 1) : 0;
 ?>
 

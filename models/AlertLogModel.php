@@ -7,6 +7,7 @@
 //
 
 require_once APP_ROOT . '/config/Database.php';
+require_once APP_ROOT . '/helpers/N8nEmailService.php';
 
 class AlertLogModel
 {
@@ -179,6 +180,16 @@ class AlertLogModel
             return $created;
         }
 
+        // Fetch student details for n8n email integration
+        $stmtStudent = $this->db->prepare(
+            'SELECT email, full_name FROM users WHERE id = ? LIMIT 1'
+        );
+        $stmtStudent->execute([$studentId]);
+        $student = $stmtStudent->fetch();
+        if (!$student) {
+            return $created; // Cannot send alert without valid student
+        }
+
         // --- Kiểm tra 1: Vắng quá nhiều ---
         $stmtAbs = $this->db->prepare(
             'SELECT COUNT(*) FROM attendance_records ar
@@ -188,7 +199,7 @@ class AlertLogModel
         $stmtAbs->execute([$courseId, $studentId]);
         $absenceCount = (int) $stmtAbs->fetchColumn();
 
-        if ($absenceCount > (int) $course['absence_threshold']) {
+        if ($absenceCount >= (int) $course['absence_threshold']) {
             if (!$this->hasOpenAlert($studentId, $courseId, self::TYPE_LOW_ATTENDANCE)) {
                 $msg = "Bạn đã vắng $absenceCount buổi trong môn {$course['course_name']} "
                      . "(ngưỡng: {$course['absence_threshold']} buổi). Vui lòng liên hệ giảng viên.";
@@ -196,6 +207,16 @@ class AlertLogModel
                     ? self::SEVERITY_HIGH : self::SEVERITY_MEDIUM;
                 $this->create($studentId, $courseId, self::TYPE_LOW_ATTENDANCE, $msg, $severity);
                 $created[] = self::TYPE_LOW_ATTENDANCE;
+                
+                // Trigger n8n Webhook
+                N8nEmailService::sendAlertWebhook(
+                    $student['email'],
+                    $student['full_name'],
+                    $course['course_name'],
+                    self::TYPE_LOW_ATTENDANCE,
+                    $msg,
+                    $severity
+                );
             }
         }
 
@@ -216,6 +237,16 @@ class AlertLogModel
                     ? self::SEVERITY_HIGH : self::SEVERITY_MEDIUM;
                 $this->create($studentId, $courseId, self::TYPE_LOW_ENGAGEMENT, $msg, $severity);
                 $created[] = self::TYPE_LOW_ENGAGEMENT;
+                
+                // Trigger n8n Webhook
+                N8nEmailService::sendAlertWebhook(
+                    $student['email'],
+                    $student['full_name'],
+                    $course['course_name'],
+                    self::TYPE_LOW_ENGAGEMENT,
+                    $msg,
+                    $severity
+                );
             }
         }
 

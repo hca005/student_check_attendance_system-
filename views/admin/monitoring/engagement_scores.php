@@ -27,10 +27,67 @@ $palette = ['avatar-blue', 'avatar-green', 'avatar-orange', 'avatar-red'];
 $barItems = $barData;
 if (count($barItems) < 7) {
     for ($i = count($barItems); $i < 7; $i++) {
-        $barItems[] = ['course_code' => 'W' . ($i + 1), 'avg_score' => 0];
+        $barItems[] = ['course_code' => 'W' . ($i + 1), 'avg_score' => 0, 'attendance_rate' => 0];
     }
 }
 ?>
+
+<style>
+.combo-dot-wrapper:hover .combo-dot-inner {
+  transform: scale(1.6);
+  background: #fff !important;
+  border-color: #facc15 !important;
+}
+
+.combo-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -5px);
+  background: #ffffff;
+  color: #334155;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
+  z-index: 50;
+}
+
+.combo-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 7px;
+  border-style: solid;
+  border-color: #e2e8f0 transparent transparent transparent;
+}
+
+.combo-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #ffffff transparent transparent transparent;
+  margin-top: -2px; /* Pull it up to overlap the border correctly */
+}
+
+.combo-dot-wrapper:hover .combo-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -15px);
+}
+</style>
 
 <div class="admin-page-title">
   <div class="left">
@@ -81,20 +138,75 @@ if (count($barItems) < 7) {
   <div class="card chart-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <h3 style="margin:0">Engagement Overview</h3>
-      <span class="badge badge-gray">Current Semester</span>
-    </div>
-    <div class="bar-chart">
-      <?php foreach ($barItems as $idx => $item): ?>
-        <?php
-          $height = max(8, min(100, (float)$item['avg_score']));
-          $code = trim((string)$item['course_code']) !== '' ? (string)$item['course_code'] : ('W' . ($idx + 1));
-          $barColor = $height >= 75 ? '#1d4ed8' : ($height >= 50 ? '#4f7fe4' : '#9dbbf7');
-        ?>
-        <div class="bar-col">
-          <div class="bar" style="--h:<?= $height ?>%;background:<?= $barColor ?>"></div>
-          <div class="bar-label"><?= htmlspecialchars($code) ?></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b;font-weight:600;">
+          <span style="display:inline-block;width:16px;height:3px;background:#facc15;border-radius:2px;"></span>
+          Attendance Rate (%)
         </div>
-      <?php endforeach; ?>
+        <span class="badge badge-gray">Current Semester</span>
+      </div>
+    </div>
+    <div class="bar-chart" style="display: flex; flex-direction: column; align-items: stretch; gap: 0; padding-bottom: 8px;">
+      <!-- Graph Area (Bars + Line) -->
+      <div style="position: relative; flex: 1; display: flex; align-items: flex-end; gap: 10px; width: 100%;">
+        <!-- SVG Line Overlay for Combo Chart -->
+        <?php 
+           $numBars = count($barItems);
+           $points = [];
+           foreach ($barItems as $idx => $item) {
+              // X center of bar = (index + 0.5) / total * 100%
+              $x = ($idx + 0.5) / $numBars * 100;
+              // Y from top = 100 - attendance_rate (because Y grows downwards in SVG)
+              $y = 100 - (int)($item['attendance_rate'] ?? 0);
+              $points[] = "{$x},{$y}";
+           }
+           $polyPoints = implode(' ', $points);
+        ?>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:10; pointer-events:none; overflow:visible;">
+          <polyline fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" points="<?= $polyPoints ?>" />
+        </svg>
+
+        <?php foreach ($barItems as $idx => $item): ?>
+          <?php
+            $height = max(8, min(100, (float)$item['avg_score']));
+            $attRate = (int)($item['attendance_rate'] ?? 0);
+            $barColor = $height >= 75 ? '#1d4ed8' : ($height >= 50 ? '#4f7fe4' : '#9dbbf7');
+          ?>
+          <div style="position: relative; flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center;">
+            <div class="bar" style="width: 100%; height: <?= $height ?>%; background: <?= $barColor ?>; border-radius: 6px 6px 0 0;"></div>
+            <!-- Dot Wrapper with Hover Tooltip -->
+            <div class="combo-dot-wrapper" style="position: absolute; bottom: <?= $attRate ?>%; left: 50%; transform: translate(-50%, 50%); z-index: 20; cursor: crosshair;">
+              <!-- Expanded Hit Area for easier hovering -->
+              <div style="padding: 10px;">
+                <!-- Perfect HTML Dot -->
+                <div class="combo-dot-inner" style="width: 8px; height: 8px; background: #facc15; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: all 0.2s;"></div>
+              </div>
+              
+              <!-- Real Data Tooltip -->
+              <div class="combo-tooltip">
+                <?php $cCode = trim((string)$item['course_code']) !== '' ? (string)$item['course_code'] : ('W' . ($idx + 1)); ?>
+                <div style="font-size: 13px; color: #0f172a; margin-bottom: 6px; font-weight: 800; padding-bottom: 0px; text-transform: uppercase;"><?= htmlspecialchars($cCode) ?></div>
+                <div style="display: flex; justify-content: space-between; gap: 14px; margin-bottom: 4px;">
+                  <span style="color: #64748b; font-weight: 500; font-size: 13px;">Attendance:</span>
+                  <span style="font-weight: 700; color: #d97706; font-size: 13px;"><?= $attRate ?>%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 14px;">
+                  <span style="color: #64748b; font-weight: 500; font-size: 13px;">Engagement:</span>
+                  <span style="font-weight: 700; color: #2563eb; font-size: 13px;"><?= (int)$height ?>%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- Labels Area -->
+      <div style="display: flex; gap: 10px; width: 100%; margin-top: 8px;">
+        <?php foreach ($barItems as $idx => $item): ?>
+          <?php $code = trim((string)$item['course_code']) !== '' ? (string)$item['course_code'] : ('W' . ($idx + 1)); ?>
+          <div style="flex: 1; text-align: center; font-size: 11px; color: #64748b;"><?= htmlspecialchars($code) ?></div>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 

@@ -124,4 +124,24 @@ class Middleware
         self::startSession();
         return ($_SESSION['role'] ?? '') === $role;
     }
+
+    // ── Kiểm tra IP WiFi Trường ───────────────────────────────
+    public static function isFromCampusWiFi(): bool
+    {
+        if (!defined('ENABLE_WIFI_RESTRICTION') || !ENABLE_WIFI_RESTRICTION) {
+            return true;
+        }
+
+        $clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
+        
+        foreach (ALLOWED_CAMPUS_IPS as $allowedIp) {
+            // Replace wildcards with regex patterns
+            $pattern = str_replace(['.', '*'], ['\.', '.*'], $allowedIp);
+            if (preg_match('/^' . $pattern . '$/', $clientIp)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

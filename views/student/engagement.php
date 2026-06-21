@@ -36,7 +36,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
   <?php foreach ($engagements as $e):
     $idx   = (float)$e['engagement_index'];
     $color = $idx >= 70 ? '#10B981' : ($idx >= 40 ? '#F59E0B' : '#EF4444');
-    $attPct = $e['total_sessions'] > 0 ? round($e['attended_sessions'] / $e['total_sessions'] * 100) : 0;
+    $attPct = $e['total_sessions'] > 0 ? min(100, round($e['attended_sessions'] / $e['total_sessions'] * 100)) : 0;
   ?>
   <div class="card" style="padding:18px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
