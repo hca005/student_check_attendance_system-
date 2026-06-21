@@ -1,41 +1,48 @@
 <?php
 // views/teacher/quiz/questions_list.php
+$page_title = 'Quiz Questions';
+$active_nav = 'quizzes';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2>Câu hỏi - <?php echo htmlspecialchars($quiz['title']); ?></h2>
-            <p class="text-muted">
-                Buổi: <?php echo date('d/m/Y H:i', strtotime($quiz['session_date'] . ' ' . $quiz['start_time'])); ?> |
-                <?php echo htmlspecialchars($quiz['course_code']); ?>
-            </p>
+    <div class="admin-page-title">
+        <div class="left">
+            <h1>Câu hỏi Quiz</h1>
+            <p>Quản lý câu hỏi cho quiz hiện tại.</p>
         </div>
-        <div class="col-md-4 text-end">
-            <a href="<?php echo APP_URL; ?>/teacher/quiz/questions_form.php?quiz_id=<?php echo $quiz['id']; ?>" class="btn btn-primary">
+        <div class="right">
+            <a href="<?php echo APP_URL; ?>/teacher/quiz/questions_form.php?quiz_id=<?php echo $quiz['id']; ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus"></i> Thêm Câu hỏi
             </a>
         </div>
     </div>
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
     <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+      <div class="card-header">
+        <div>
+          <div class="card-title"><?php echo htmlspecialchars($quiz['title']); ?></div>
+          <div class="text-muted" style="font-size:13px;">Buổi: <?php echo date('d/m/Y H:i', strtotime($quiz['session_date'] . ' ' . $quiz['start_time'])); ?> | <?php echo htmlspecialchars($quiz['course_code']); ?></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+                <button type="button" class="btn-close"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+                <button type="button" class="btn-close"></button>
+            </div>
+        <?php endif; ?>
+
+        <div class="table-wrap">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
@@ -82,10 +89,12 @@ require_once APP_ROOT . '/views/layouts/header.php';
                     <?php endif; ?>
                 </tbody>
             </table>
+          </div>
         </div>
+      </div>
     </div>
 
-    <div class="mt-3 d-flex gap-2">
+    <div class="mt-3 d-flex flex-wrap gap-2">
         <a href="<?php echo APP_URL; ?>/teacher/quiz/sessions_list.php?session_id=<?php echo $quiz['session_id']; ?>" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Quay lại Quiz
         </a>

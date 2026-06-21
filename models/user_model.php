@@ -109,8 +109,8 @@ class UserModel
     public function createUser(array $data): bool
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO users (full_name, email, password_hash, role, student_code, is_active)
-             VALUES (?, ?, ?, ?, ?, ?)"
+            "INSERT INTO users (full_name, email, password_hash, role, student_code, is_active, avatar_url, gender, date_of_birth, id_card_number, hometown, phone, department, qualification, class_name, academic_year)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         return $stmt->execute([
             $data['full_name'],
@@ -119,24 +119,40 @@ class UserModel
             $data['role'],
             $data['student_code'] ?? null,
             $data['is_active']    ?? 1,
+            $data['avatar_url']   ?? null,
+            $data['gender']       ?? null,
+            $data['date_of_birth']?? null,
+            $data['id_card_number']?? null,
+            $data['hometown']     ?? null,
+            $data['phone']        ?? null,
+            $data['department']   ?? null,
+            $data['qualification']?? null,
+            $data['class_name']   ?? null,
+            $data['academic_year']?? null,
         ]);
     }
 
     // ── UPDATE ────────────────────────────────────────────
     public function updateUser(int $id, array $data): bool
     {
-        $sets   = ['full_name = ?', 'email = ?', 'role = ?', 'student_code = ?', 'is_active = ?'];
-        $params = [
-            $data['full_name'],
-            $data['email'],
-            $data['role'],
-            $data['student_code'] ?? null,
-            (int)($data['is_active'] ?? 1),
-        ];
+        $allowedFields = ['full_name', 'email', 'role', 'student_code', 'is_active', 'avatar_url', 'gender', 'date_of_birth', 'id_card_number', 'hometown', 'phone', 'department', 'qualification', 'class_name', 'academic_year'];
+        $sets = [];
+        $params = [];
+        
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $data)) {
+                $sets[] = "$field = ?";
+                $params[] = $data[$field];
+            }
+        }
 
         if (!empty($data['password_hash'])) {
             $sets[]   = 'password_hash = ?';
             $params[] = $data['password_hash'];
+        }
+
+        if (empty($sets)) {
+            return true;
         }
 
         $params[] = $id;

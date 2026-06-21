@@ -5,6 +5,7 @@ $active_nav = 'attendance';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
+<<<<<<< HEAD
 <div class="container mt-4">
     <div class="admin-page-title">
         <div class="left">
@@ -14,6 +15,17 @@ require_once APP_ROOT . '/views/layouts/header.php';
         <div class="right">
             <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus"></i> Tạo Phương thức
+=======
+<div style="padding: 24px;">
+    <div class="admin-page-title">
+        <div class="left">
+            <h1 style="font-size: 24px; margin-bottom: 4px;">Phương thức Điểm danh - <?php echo htmlspecialchars($session['course_code']); ?></h1>
+            <p>Buổi: <?php echo date('d/m/Y H:i', strtotime($session['session_date'] . ' ' . $session['start_time'])); ?></p>
+        </div>
+        <div class="right">
+            <a href="<?php echo APP_URL; ?>/teacher/attendance/methods_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary">
+                Tạo Phương thức
+>>>>>>> 1bfe985867e3f5e54a851fa8f599402e694d8060
             </a>
         </div>
     </div>
