@@ -5,7 +5,6 @@ $active_nav = 'quizzes';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<<<<<<< HEAD
 <div class="container mt-4">
     <div class="admin-page-title">
         <div class="left">
@@ -15,17 +14,6 @@ require_once APP_ROOT . '/views/layouts/header.php';
         <div class="right">
             <a href="<?php echo APP_URL; ?>/teacher/quiz/sessions_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus"></i> Tạo Quiz
-=======
-<div style="padding: 24px;">
-    <div class="admin-page-title">
-        <div class="left">
-            <h1 style="font-size: 24px; margin-bottom: 4px;">Quiz - <?php echo htmlspecialchars($session['course_code']); ?></h1>
-            <p>Buổi: <?php echo date('d/m/Y H:i', strtotime($session['session_date'] . ' ' . $session['start_time'])); ?></p>
-        </div>
-        <div class="right">
-            <a href="<?php echo APP_URL; ?>/teacher/quiz/sessions_form.php?session_id=<?php echo $session['id']; ?>" class="btn btn-primary">
-                Tạo Quiz
->>>>>>> 1bfe985867e3f5e54a851fa8f599402e694d8060
             </a>
         </div>
     </div>
@@ -52,11 +40,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
           </div>
         <?php endif; ?>
 
-<<<<<<< HEAD
       <div class="row">
-=======
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
->>>>>>> 1bfe985867e3f5e54a851fa8f599402e694d8060
         <?php if (empty($quizzes)): ?>
             <div style="grid-column: 1 / -1;">
                 <div class="alert alert-info">Chưa có quiz nào</div>
