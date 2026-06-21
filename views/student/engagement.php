@@ -5,197 +5,108 @@
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<div class="page-title">My Engagement</div>
-<p class="page-sub">Tổng hợp điểm tham gia và lịch sử tương tác của bạn</p>
+<div class="admin-page-title">
+  <div class="left">
+    <h1>My Engagement</h1>
+    <p>Engagement index and activity history per course</p>
+  </div>
+</div>
 
-<!-- ── Cảnh báo đang mở ─────────────────────────────────── -->
 <?php if (!empty($openAlerts)): ?>
-<div style="background:#FEF3C7;border:1.5px solid #F59E0B;border-radius:10px;padding:14px 18px;margin-bottom:22px">
-  <div style="font-weight:700;color:#92400E;margin-bottom:8px">
-    ⚠️ Bạn có <?= count($openAlerts) ?> cảnh báo đang mở
+<div class="alert alert-warning" style="align-items:flex-start;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:8px">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <strong>You have <?= count($openAlerts) ?> open alert<?= count($openAlerts) > 1 ? 's' : '' ?></strong>
   </div>
   <?php foreach ($openAlerts as $al): ?>
-  <div style="font-size:13px;color:#92400E;padding:6px 0;border-bottom:1px solid rgba(245,158,11,.2)">
-    <strong>[<?= htmlspecialchars($al['course_code']) ?>]</strong>
-    <?= htmlspecialchars($al['message']) ?>
-  </div>
+  <div style="font-size:13px;margin-top:6px;margin-left:24px">[<?= htmlspecialchars($al['course_code']) ?>] <?= htmlspecialchars($al['message']) ?></div>
   <?php endforeach; ?>
 </div>
 <?php endif; ?>
 
-<!-- ── Engagement theo từng môn ─────────────────────────── -->
 <?php if (empty($engagements)): ?>
-<div class="card" style="padding:40px;text-align:center;color:#94A3B8">
-  <div style="font-size:40px;margin-bottom:12px">📊</div>
-  <div>Chưa có dữ liệu engagement. Hãy tích cực tham gia lớp học!</div>
+<div class="card empty-state">
+  <div class="icon-circle" style="background:#FFF7ED"><svg fill="none" viewBox="0 0 24 24" stroke="#F59E0B" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+  No engagement data yet — attend a session or take a quiz to get started.
 </div>
 
 <?php else: ?>
-<div style="font-weight:700;font-size:14px;color:#374151;margin-bottom:14px">Engagement theo môn học</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px">
+<div style="font-weight:700;font-size:14px;margin-bottom:12px">Engagement by course</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-bottom:28px">
   <?php foreach ($engagements as $e):
     $idx   = (float)$e['engagement_index'];
-    $color = $idx >= 70 ? '#059669' : ($idx >= 40 ? '#D97706' : '#DC2626');
-    $bg    = $idx >= 70 ? '#F0FDF4' : ($idx >= 40 ? '#FFFBEB' : '#FEF2F2');
-    $label = $idx >= 70 ? 'Tốt 🎉' : ($idx >= 40 ? 'Trung bình ⚠️' : 'Cần cải thiện ❗');
+    $color = $idx >= 70 ? '#10B981' : ($idx >= 40 ? '#F59E0B' : '#EF4444');
+    $attPct = $e['total_sessions'] > 0 ? round($e['attended_sessions'] / $e['total_sessions'] * 100) : 0;
   ?>
-  <div class="card" style="padding:20px">
-    <!-- Course name -->
+  <div class="card" style="padding:18px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
       <div>
-        <span style="background:#EFF6FF;color:#2563EB;padding:2px 10px;border-radius:99px;
-                     font-size:11px;font-weight:700"><?= htmlspecialchars($e['course_code']) ?></span>
-        <div style="font-weight:700;font-size:14px;color:#0F172A;margin-top:6px">
-          <?= htmlspecialchars($e['course_name']) ?>
-        </div>
-        <div style="font-size:11px;color:#94A3B8"><?= htmlspecialchars($e['semester'] ?? '') ?></div>
+        <span class="badge badge-primary"><?= htmlspecialchars($e['course_code']) ?></span>
+        <div style="font-weight:700;font-size:14px;margin-top:6px"><?= htmlspecialchars($e['course_name']) ?></div>
       </div>
-      <div style="text-align:right">
-        <div style="font-size:28px;font-weight:800;color:<?= $color ?>"><?= $idx ?>%</div>
-        <div style="font-size:11px;font-weight:700;color:<?= $color ?>"><?= $label ?></div>
+      <div class="score-ring" style="--ring-size:64px;--pct:<?= $idx ?>;--ring-color:<?= $color ?>">
+        <span class="score-ring-label" style="font-size:14px"><?= $idx ?>%</span>
       </div>
     </div>
-
-    <!-- Engagement index bar -->
-    <div style="background:#F1F5F9;border-radius:99px;height:8px;margin-bottom:16px">
-      <div style="background:<?= $color ?>;height:8px;border-radius:99px;
-                  width:<?= $idx ?>%;transition:width .5s"></div>
-    </div>
-
-    <!-- Detail stats -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
-      <?php
-      $attPct = $e['total_sessions'] > 0
-        ? round($e['attended_sessions'] / $e['total_sessions'] * 100) : 0;
-      ?>
-      <div style="text-align:center;padding:10px 6px;background:<?= $bg ?>;border-radius:8px">
-        <div style="font-size:16px;font-weight:800;color:<?= $color ?>"><?= $attPct ?>%</div>
-        <div style="font-size:10px;color:#94A3B8;margin-top:2px">Điểm danh<br><?= $e['attended_sessions'] ?>/<?= $e['total_sessions'] ?></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="text-align:center;padding:8px 4px;background:var(--bg);border-radius:8px">
+        <div style="font-weight:700;color:<?= $attPct>=80?'#10B981':($attPct>=60?'#F59E0B':'#EF4444') ?>"><?= $attPct ?>%</div>
+        <div style="font-size:10px;color:var(--text-muted)">Attendance</div>
       </div>
-      <div style="text-align:center;padding:10px 6px;background:#F8FAFC;border-radius:8px">
-        <div style="font-size:16px;font-weight:800;color:#7C3AED"><?= round($e['total_quiz_score'],1) ?></div>
-        <div style="font-size:10px;color:#94A3B8;margin-top:2px">Điểm quiz</div>
+      <div style="text-align:center;padding:8px 4px;background:var(--bg);border-radius:8px">
+        <div style="font-weight:700;color:#7C3AED"><?= round($e['total_quiz_score'], 1) ?></div>
+        <div style="font-size:10px;color:var(--text-muted)">Quiz pts</div>
       </div>
-      <div style="text-align:center;padding:10px 6px;background:#F8FAFC;border-radius:8px">
-        <div style="font-size:16px;font-weight:800;color:#0369A1"><?= round($e['total_interaction_points'],1) ?></div>
-        <div style="font-size:10px;color:#94A3B8;margin-top:2px">Điểm tương tác</div>
+      <div style="text-align:center;padding:8px 4px;background:var(--bg);border-radius:8px">
+        <div style="font-weight:700;color:#0369A1"><?= round($e['total_interaction_points'], 1) ?></div>
+        <div style="font-size:10px;color:var(--text-muted)">Interaction</div>
       </div>
     </div>
-
-    <!-- Cập nhật lúc -->
-    <?php if (!empty($e['calculated_at'])): ?>
-    <div style="font-size:11px;color:#94A3B8;text-align:right">
-      Cập nhật: <?= date('d/m/Y H:i', strtotime($e['calculated_at'])) ?>
-    </div>
-    <?php endif; ?>
   </div>
   <?php endforeach; ?>
 </div>
 <?php endif; ?>
 
-<!-- ── Lịch sử nộp quiz ──────────────────────────────────── -->
 <?php if (!empty($quizHistory)): ?>
-<div style="font-weight:700;font-size:14px;color:#374151;margin-bottom:12px">Lịch sử nộp quiz (20 gần nhất)</div>
-<div class="card" style="overflow:hidden;margin-bottom:28px">
-  <div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse;font-size:14px">
-      <thead>
-        <tr style="background:#F8FAFC">
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Quiz</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Môn</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Điểm</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">%</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Thời gian</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($quizHistory as $q):
-          $pct   = $q['max_score'] > 0 ? round($q['total_score'] / $q['max_score'] * 100) : 0;
-          $color = $pct >= 70 ? '#059669' : ($pct >= 50 ? '#D97706' : '#DC2626');
-        ?>
-        <tr style="border-bottom:1px solid #F8FAFC" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">
-          <td style="padding:12px 16px;color:#0F172A;font-weight:600"><?= htmlspecialchars($q['quiz_title']) ?></td>
-          <td style="padding:12px 16px">
-            <span style="background:#EFF6FF;color:#2563EB;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700">
-              <?= htmlspecialchars($q['course_code']) ?>
-            </span>
-          </td>
-          <td style="padding:12px 16px;font-weight:700;color:<?= $color ?>">
-            <?= $q['total_score'] ?> / <?= $q['max_score'] ?>
-          </td>
-          <td style="padding:12px 16px">
-            <span style="background:<?= $pct>=70?'#D1FAE5':($pct>=50?'#FEF3C7':'#FEE2E2') ?>;
-                         color:<?= $color ?>;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700">
-              <?= $pct ?>%
-            </span>
-          </td>
-          <td style="padding:12px 16px;color:#64748B;font-size:13px">
-            <?= date('d/m/Y H:i', strtotime($q['submitted_at'])) ?>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
+<div style="font-weight:700;font-size:14px;margin-bottom:12px">Recent quiz submissions</div>
+<div class="card table-wrap" style="margin-bottom:28px">
+  <table>
+    <thead><tr><th>Quiz</th><th>Course</th><th>Score</th><th>Submitted</th></tr></thead>
+    <tbody>
+    <?php foreach (array_slice($quizHistory, 0, 10) as $q):
+      $pct = $q['max_score'] > 0 ? round($q['total_score'] / $q['max_score'] * 100) : 0;
+    ?>
+    <tr>
+      <td><?= htmlspecialchars($q['quiz_title']) ?></td>
+      <td><span class="badge badge-primary"><?= htmlspecialchars($q['course_code']) ?></span></td>
+      <td><?= $q['total_score'] ?>/<?= $q['max_score'] ?> (<?= $pct ?>%)</td>
+      <td><?= date('d/m/Y H:i', strtotime($q['submitted_at'])) ?></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
 </div>
 <?php endif; ?>
 
-<!-- ── Lịch sử tương tác ─────────────────────────────────── -->
 <?php if (!empty($interactionLogs)): ?>
-<div style="font-weight:700;font-size:14px;color:#374151;margin-bottom:12px">Lịch sử tương tác (30 gần nhất)</div>
-<div class="card" style="overflow:hidden">
-  <div style="overflow-x:auto">
-    <table style="width:100%;border-collapse:collapse;font-size:14px">
-      <thead>
-        <tr style="background:#F8FAFC">
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Loại</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Mô tả</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Môn / Buổi</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Điểm</th>
-          <th style="padding:11px 16px;text-align:left;font-size:12px;font-weight:600;color:#64748B">Thời gian</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php
-        $actionIcons = [
-          'check_in'        => ['🟢','Điểm danh'],
-          'submit_quiz'     => ['📝','Nộp quiz'],
-          'answer_question' => ['💬','Trả lời'],
-          'discussion'      => ['🗣️','Thảo luận'],
-          'other'           => ['⚡','Khác'],
-        ];
-        foreach ($interactionLogs as $log):
-          [$icon, $label] = $actionIcons[$log['action_type']] ?? ['⚡','Khác'];
-        ?>
-        <tr style="border-bottom:1px solid #F8FAFC" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">
-          <td style="padding:11px 16px;white-space:nowrap">
-            <span style="font-size:13px"><?= $icon ?> <?= $label ?></span>
-          </td>
-          <td style="padding:11px 16px;color:#374151;font-size:13px">
-            <?= htmlspecialchars($log['description'] ?? '—') ?>
-          </td>
-          <td style="padding:11px 16px;font-size:12px;color:#64748B">
-            <?= htmlspecialchars($log['course_name'] ?? '') ?><br>
-            <span style="color:#94A3B8"><?= htmlspecialchars($log['session_date'] ?? '') ?></span>
-          </td>
-          <td style="padding:11px 16px;font-weight:700;color:<?= $log['points_earned']>0?'#059669':'#94A3B8' ?>">
-            +<?= $log['points_earned'] ?>
-          </td>
-          <td style="padding:11px 16px;color:#64748B;font-size:12px;white-space:nowrap">
-            <?= date('d/m H:i', strtotime($log['created_at'])) ?>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-</div>
-<?php endif; ?>
-
-<?php if (empty($engagements) && empty($quizHistory) && empty($interactionLogs)): ?>
-<div class="card" style="padding:40px;text-align:center;color:#94A3B8;margin-top:20px">
-  <div style="font-size:40px;margin-bottom:12px">🌱</div>
-  <div>Chưa có hoạt động nào được ghi nhận. Hãy điểm danh và làm quiz!</div>
+<div style="font-weight:700;font-size:14px;margin-bottom:12px">Recent activity</div>
+<div class="card table-wrap">
+  <table>
+    <thead><tr><th>Action</th><th>Description</th><th>Course</th><th>Points</th><th>When</th></tr></thead>
+    <tbody>
+    <?php
+    $actionLabel = ['check_in'=>'Check-in','submit_quiz'=>'Quiz submitted','answer_question'=>'Answered','discussion'=>'Discussion','other'=>'Other'];
+    foreach (array_slice($interactionLogs, 0, 15) as $log): ?>
+    <tr>
+      <td><?= $actionLabel[$log['action_type']] ?? 'Other' ?></td>
+      <td><?= htmlspecialchars($log['description'] ?? '—') ?></td>
+      <td><?= htmlspecialchars($log['course_name'] ?? '') ?></td>
+      <td style="color:<?= $log['points_earned']>0?'#10B981':'#94A3B8' ?>">+<?= $log['points_earned'] ?></td>
+      <td><?= date('d/m H:i', strtotime($log['created_at'])) ?></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
 </div>
 <?php endif; ?>
 

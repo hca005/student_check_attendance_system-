@@ -5,48 +5,44 @@
 require_once APP_ROOT . '/views/layouts/header.php';
 
 $msgMap = [
-  'already_submitted' => ['Bạn đã nộp bài quiz này rồi.', false],
-  'quiz_closed'       => ['Quiz này đã đóng hoặc không tồn tại.', false],
+  'already_submitted' => 'You have already submitted this quiz.',
+  'quiz_closed'       => 'This quiz is closed or no longer exists.',
 ];
-[$flashText, $flashOk] = $msgMap[$_GET['msg'] ?? ''] ?? [null, null];
+$flashText = $msgMap[$_GET['msg'] ?? ''] ?? null;
 ?>
 
-<div class="page-title">My Quizzes</div>
-<p class="page-sub">Danh sách quiz theo môn học</p>
-
-<?php if ($flashText !== null): ?>
-<div style="padding:12px 16px;border-radius:8px;margin-bottom:18px;font-size:14px;font-weight:600;
-            background:<?= $flashOk?'#D1FAE5':'#FEE2E2' ?>;color:<?= $flashOk?'#065F46':'#991B1B' ?>">
-  <?= htmlspecialchars($flashText) ?>
+<div class="admin-page-title">
+  <div class="left">
+    <h1>My Quizzes</h1>
+    <p>Quizzes available per course</p>
+  </div>
 </div>
+
+<?php if ($flashText): ?>
+<div class="alert alert-warning"><?= htmlspecialchars($flashText) ?></div>
 <?php endif; ?>
 
 <?php if (empty($courses)): ?>
-<div class="card" style="padding:40px;text-align:center;color:#94A3B8">
-  <div style="font-size:36px;margin-bottom:10px">📋</div>
-  <div>Bạn chưa được ghi danh vào môn học nào.</div>
+<div class="card empty-state">
+  <div class="icon-circle" style="background:#EFF6FF"><svg fill="none" viewBox="0 0 24 24" stroke="#2563EB" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg></div>
+  You're not enrolled in any course yet.
 </div>
 
 <?php else: ?>
 
-<!-- ── Chọn môn học ───────────────────────────────────── -->
-<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:22px">
-  <span style="font-size:13px;font-weight:600;color:#374151">Môn học:</span>
+<div class="course-tabs">
   <?php foreach ($courses as $c): ?>
   <a href="<?= APP_URL ?>/student/quiz.php?course_id=<?= $c['id'] ?>"
-     style="padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;
-            background:<?= (int)$c['id']===$courseId?'#2563EB':'#F1F5F9' ?>;
-            color:<?= (int)$c['id']===$courseId?'#fff':'#374151' ?>">
+     class="course-tab <?= (int)$c['id'] === $courseId ? 'active' : '' ?>">
     <?= htmlspecialchars($c['course_code']) ?>
   </a>
   <?php endforeach; ?>
 </div>
 
-<!-- ── Danh sách quiz ─────────────────────────────────── -->
 <?php if (empty($quizzes)): ?>
-<div class="card" style="padding:40px;text-align:center;color:#94A3B8">
-  <div style="font-size:36px;margin-bottom:10px">📝</div>
-  <div>Chưa có quiz nào trong môn học này.</div>
+<div class="card empty-state">
+  <div class="icon-circle" style="background:#F0FDF4"><svg fill="none" viewBox="0 0 24 24" stroke="#10B981" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+  No quizzes have been published for this course yet.
 </div>
 
 <?php else: ?>
@@ -57,88 +53,56 @@ $msgMap = [
     $myScore    = (float)($q['my_score']  ?? 0);
     $maxScore   = (float)($q['max_score'] ?? 0);
     $scorePct   = $maxScore > 0 ? round($myScore / $maxScore * 100) : 0;
-    $scoreColor = $scorePct >= 70 ? '#059669' : ($scorePct >= 50 ? '#D97706' : '#DC2626');
-
-    [$statusBg, $statusText] = match($q['status']) {
-      'open'   => ['#D1FAE5;color:#065F46', '🟢 Đang mở'],
-      'closed' => ['#F1F5F9;color:#475569',  '⚫ Đã đóng'],
-      default  => ['#FEF3C7;color:#92400E',  '🟡 Nháp'],
+    $ringColor  = $scorePct >= 70 ? '#10B981' : ($scorePct >= 50 ? '#F59E0B' : '#EF4444');
+    $statusBadge = match($q['status']) {
+      'open'   => ['badge-success', 'Open'],
+      'closed' => ['badge-gray',    'Closed'],
+      default  => ['badge-warning', 'Draft'],
     };
   ?>
-  <div class="card" style="padding:20px;display:flex;flex-direction:column">
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <span style="font-size:11px;color:#94A3B8"><?= htmlspecialchars($q['session_date']) ?></span>
-      <span style="background:<?= $statusBg ?>;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700">
-        <?= $statusText ?>
-      </span>
+  <div class="card card-interactive" style="padding:20px;display:flex;flex-direction:column">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--text-muted)"><?= htmlspecialchars($q['session_date']) ?></span>
+      <span class="badge <?= $statusBadge[0] ?>"><?= $statusBadge[1] ?></span>
     </div>
 
-    <!-- Tên quiz -->
-    <div style="font-weight:700;font-size:15px;color:#0F172A;margin-bottom:4px">
-      <?= htmlspecialchars($q['title']) ?>
-    </div>
-    <div style="font-size:12px;color:#94A3B8;margin-bottom:4px">
-      <?= htmlspecialchars($q['session_title'] ?? '') ?>
-    </div>
-    <div style="font-size:12px;color:#64748B;margin-bottom:14px;display:flex;gap:12px">
-      <span>📋 <?= (int)$q['question_count'] ?> câu hỏi</span>
-      <?php if ($q['time_limit_minutes']): ?>
-      <span>⏱ <?= $q['time_limit_minutes'] ?> phút</span>
-      <?php else: ?>
-      <span>⏱ Không giới hạn</span>
-      <?php endif; ?>
-      <?php if ($q['allow_retake']): ?>
-      <span style="color:#059669">🔄 Được làm lại</span>
-      <?php endif; ?>
-    </div>
-
-    <!-- Kết quả nếu đã nộp -->
-    <?php if ($submitted): ?>
-    <div style="background:#F8FAFC;border-radius:10px;padding:12px;margin-bottom:14px">
-      <div style="font-size:11px;color:#64748B;margin-bottom:6px;font-weight:600">KẾT QUẢ CỦA BẠN</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:24px;font-weight:800;color:<?= $scoreColor ?>">
-          <?= $myScore ?>/<?= $maxScore ?>
-        </span>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:<?= $scoreColor ?>"><?= $scorePct ?>%</div>
-          <div style="font-size:11px;color:#94A3B8"><?= $scorePct>=70?'Xuất sắc':($scorePct>=50?'Đạt':'Cần cố gắng') ?></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px"><?= htmlspecialchars($q['title']) ?></div>
+        <div style="font-size:12px;color:var(--text-muted)">
+          <?= (int)$q['question_count'] ?> questions
+          <?= $q['time_limit_minutes'] ? ' · ' . $q['time_limit_minutes'] . ' min' : ' · No time limit' ?>
+          <?= $q['allow_retake'] ? ' · Retake allowed' : '' ?>
         </div>
       </div>
-      <!-- Score bar -->
-      <div style="background:#E2E8F0;border-radius:99px;height:5px;margin-top:8px">
-        <div style="background:<?= $scoreColor ?>;height:5px;border-radius:99px;width:<?= $scorePct ?>%"></div>
-      </div>
-    </div>
-    <?php else: ?>
-    <div style="flex:1"></div>
-    <?php endif; ?>
-
-    <!-- Nút hành động -->
-    <div>
-      <?php if ($canTake): ?>
-      <a href="<?= APP_URL ?>/student/quiz.php?action=take&quiz_id=<?= $q['id'] ?>"
-         style="display:block;width:100%;padding:10px 0;background:#2563EB;color:#fff;border-radius:8px;
-                text-align:center;font-size:14px;font-weight:700;text-decoration:none;box-sizing:border-box">
-        <?= $submitted ? '🔄 Làm lại' : '✏️ Bắt đầu làm bài' ?>
-      </a>
-      <?php elseif ($submitted): ?>
-      <div style="padding:10px 0;background:#F0FDF4;border-radius:8px;text-align:center;
-                  font-size:14px;font-weight:600;color:#059669">
-        ✅ Đã nộp bài
-      </div>
-      <?php else: ?>
-      <div style="padding:10px 0;background:#F1F5F9;border-radius:8px;text-align:center;
-                  font-size:14px;font-weight:600;color:#94A3B8">
-        🔒 Quiz chưa mở
+      <?php if ($submitted): ?>
+      <div class="score-ring" style="--ring-size:52px;--pct:<?= $scorePct ?>;--ring-color:<?= $ringColor ?>">
+        <span class="score-ring-label" style="font-size:12px"><?= $scorePct ?>%</span>
       </div>
       <?php endif; ?>
     </div>
+
+    <div style="flex:1"></div>
+
+    <?php if ($canTake): ?>
+    <a href="<?= APP_URL ?>/student/quiz.php?action=take&quiz_id=<?= $q['id'] ?>" class="btn btn-primary" style="justify-content:center">
+      <?= $submitted ? 'Retake quiz' : 'Start quiz' ?>
+    </a>
+    <?php elseif ($submitted): ?>
+    <div class="btn btn-sm" style="justify-content:center;background:#ECFDF5;color:#059669;cursor:default">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Submitted
+    </div>
+    <?php else: ?>
+    <div class="btn btn-sm" style="justify-content:center;background:#F1F5F9;color:#94A3B8;cursor:default">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Not open yet
+    </div>
+    <?php endif; ?>
   </div>
   <?php endforeach; ?>
 </div>
-<?php endif; ?><!-- /quizzes -->
-<?php endif; ?><!-- /courses -->
+<?php endif; ?>
+<?php endif; ?>
 
 <?php require_once APP_ROOT . '/views/layouts/footer.php'; ?>
