@@ -133,6 +133,12 @@ class AttendanceController
         require_once APP_ROOT . '/views/teacher/attendance/methods_form.php';
     }
 
+    public function createMethod(): void
+    {
+        // Compatibility route for legacy POST /teacher/attendance/create.php
+        $this->methodsForm();
+    }
+
     // ──────────────────────────────────────────────────────
     // POST /teacher/attendance/methods_delete.php
     // Xóa phương thức điểm danh
@@ -224,8 +230,15 @@ class AttendanceController
         $this->verifyTeacherOwnsSession($sessionId);
 
         $note = trim($_POST['note'] ?? '');
+        $updates = ['status' => $status, 'note' => $note, 'verified_by' => $_SESSION['user_id']];
 
-        if ($this->recordModel->update($recordId, ['status' => $status, 'note' => $note])) {
+        if (in_array($status, ['present', 'late'], true)) {
+            $updates['checked_in_at'] = new DateTime();
+        } else {
+            $updates['checked_in_at'] = null;
+        }
+
+        if ($this->recordModel->update($recordId, $updates)) {
             $_SESSION['success'] = 'Cập nhật trạng thái thành công!';
         } else {
             $_SESSION['error'] = 'Cập nhật thất bại';
@@ -240,6 +253,10 @@ class AttendanceController
     // ──────────────────────────────────────────────────────
     private function verifyTeacherOwnsSession(int $sessionId): void
     {
+        if (($_SESSION['role'] ?? '') === 'admin') {
+            return;
+        }
+
         $stmt = $this->db->prepare(
             'SELECT teacher_id FROM class_sessions WHERE id = ?'
         );

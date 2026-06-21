@@ -105,6 +105,15 @@ class UserController
                     'role' => $old['role'],
                     'student_code' => $old['student_code'],
                     'is_active' => $old['is_active'],
+                    'gender' => $old['gender'] ?? null,
+                    'date_of_birth' => $old['date_of_birth'] ?? null,
+                    'id_card_number' => $old['id_card_number'] ?? null,
+                    'hometown' => $old['hometown'] ?? null,
+                    'phone' => $old['phone'] ?? null,
+                    'department' => $old['department'] ?? null,
+                    'qualification' => $old['qualification'] ?? null,
+                    'class_name' => $old['class_name'] ?? null,
+                    'academic_year' => $old['academic_year'] ?? null,
                 ];
                 if (!empty($old['password'])) {
                     $payload['password_hash'] = password_hash($old['password'], PASSWORD_DEFAULT);
@@ -165,6 +174,64 @@ class UserController
         $this->redirectList();
     }
 
+    public function show(): void
+    {
+        Middleware::requireAdmin();
+        $id = (int)($_GET['id'] ?? 0);
+        $user = $this->model->getUserById($id);
+        if (!$user) {
+            $_SESSION['flash_error'] = 'User not found.';
+            $this->redirectList();
+        }
+
+        // Fetch additional data based on role
+        $db = Database::getInstance()->getConnection();
+        $attendanceStats = null;
+        $attendanceHistory = [];
+        $teacherClasses = [];
+
+        if ($user['role'] === 'student') {
+            // Calculate attendance stats
+            $stmt = $db->prepare("
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count,
+                    SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_count,
+                    SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent_count
+                FROM attendance_records ar
+                JOIN class_sessions cs ON ar.session_id = cs.id
+                WHERE ar.student_id = ?
+            ");
+            $stmt->execute([$id]);
+            $attendanceStats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Fetch history
+            $stmt2 = $db->prepare("
+                SELECT c.course_name, cs.title, cs.session_date, ar.status, ar.recorded_at
+                FROM attendance_records ar
+                JOIN class_sessions cs ON ar.session_id = cs.id
+                JOIN courses c ON cs.course_id = c.id
+                WHERE ar.student_id = ?
+                ORDER BY cs.session_date DESC
+                LIMIT 20
+            ");
+            $stmt2->execute([$id]);
+            $attendanceHistory = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        } elseif ($user['role'] === 'teacher') {
+            $stmt = $db->prepare("
+                SELECT c.course_code, c.course_name, COUNT(cs.id) as session_count
+                FROM courses c
+                LEFT JOIN class_sessions cs ON c.id = cs.course_id AND cs.teacher_id = ?
+                WHERE c.id IN (SELECT DISTINCT course_id FROM class_sessions WHERE teacher_id = ?)
+                GROUP BY c.id
+            ");
+            $stmt->execute([$id, $id]);
+            $teacherClasses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        require APP_ROOT . '/views/admin/users/show.php';
+    }
+
     private function collectPayload(array $source): array
     {
         return [
@@ -174,6 +241,15 @@ class UserController
             'role' => (string)($source['role'] ?? 'student'),
             'student_code' => trim((string)($source['student_code'] ?? '')),
             'is_active' => (int)($source['is_active'] ?? 1),
+            'gender' => !empty($source['gender']) ? $source['gender'] : null,
+            'date_of_birth' => !empty($source['date_of_birth']) ? $source['date_of_birth'] : null,
+            'id_card_number' => !empty($source['id_card_number']) ? trim($source['id_card_number']) : null,
+            'hometown' => !empty($source['hometown']) ? trim($source['hometown']) : null,
+            'phone' => !empty($source['phone']) ? trim($source['phone']) : null,
+            'department' => !empty($source['department']) ? trim($source['department']) : null,
+            'qualification' => !empty($source['qualification']) ? trim($source['qualification']) : null,
+            'class_name' => !empty($source['class_name']) ? trim($source['class_name']) : null,
+            'academic_year' => !empty($source['academic_year']) ? trim($source['academic_year']) : null,
         ];
     }
 

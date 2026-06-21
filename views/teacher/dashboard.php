@@ -26,13 +26,20 @@ $upcoming = $db->query(
    ORDER BY cs.session_date ASC, cs.start_time ASC LIMIT 6", [$userId]
 )->fetchAll();
 
+$page_title = 'Teacher Dashboard';
+$active_nav = 'dashboard';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 
-<div class="page-title">My Dashboard</div>
-<p class="page-sub">Overview of your courses and classroom activity</p>
+<div class="container mt-4">
+  <div class="admin-page-title">
+    <div class="left">
+      <h1>Teacher Dashboard</h1>
+      <p>Overview of your courses and classroom activity.</p>
+    </div>
+  </div>
 
-<div class="stat-cards">
+  <div class="stat-cards">
   <div class="card stat-card">
     <div class="stat-icon" style="background:#EFF6FF">
       <svg fill="none" viewBox="0 0 24 24" stroke="#2563EB" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -108,7 +115,7 @@ require_once APP_ROOT . '/views/layouts/header.php';
         <td><span class="badge <?= $statusCls[$s['status']] ?? 'badge-gray' ?>"><?= ucfirst($s['status']) ?></span></td>
         <td>
           <div style="display:flex;gap:6px">
-            <a href="<?= APP_URL ?>/teacher/attendance.php?session_id=<?= $s['id'] ?>" class="btn btn-outline btn-sm">Attendance</a>
+            <a href="<?= APP_URL ?>/teacher/attendance.php?session_id=<?= $s['id'] ?>" class="btn btn-outline-secondary btn-sm">Attendance</a>
             <a href="<?= APP_URL ?>/teacher/quiz.php?session_id=<?= $s['id'] ?>" class="btn btn-sm" style="background:#F1F5F9;color:#374151">Quiz</a>
           </div>
         </td>

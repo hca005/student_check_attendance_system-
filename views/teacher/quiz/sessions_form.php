@@ -1,5 +1,7 @@
 <?php
 // views/teacher/quiz/sessions_form.php
+$page_title = $quizId ? 'Edit Quiz' : 'Create Quiz';
+$active_nav = 'quizzes';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 

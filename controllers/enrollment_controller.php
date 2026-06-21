@@ -49,20 +49,64 @@ class EnrollmentController
         $record = [
             'course_id' => '',
             'role' => 'student',
-            'user_id' => '',
+            'user_ids' => [],
         ];
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $record = $this->collectPayload($_POST);
-            $errors = $this->validate($record);
+            $record['course_id'] = (int)($_POST['course_id'] ?? 0);
+            $record['role'] = (string)($_POST['role'] ?? 'student');
+            $user_ids_raw = $_POST['user_ids'] ?? [];
+            if (!is_array($user_ids_raw) && !empty($_POST['user_id'])) {
+                $user_ids_raw = [$_POST['user_id']];
+            }
+            $record['user_ids'] = array_map('intval', (array)$user_ids_raw);
+
+            if (!in_array($record['role'], ['teacher', 'student'], true)) {
+                $errors['role'] = 'Role must be teacher or student.';
+            }
+
+            $courseIds = array_map(
+                static fn(array $item): int => (int)$item['id'],
+                $courses
+            );
+            if (!in_array($record['course_id'], $courseIds, true)) {
+                $errors['course_id'] = 'Please select a valid course.';
+            }
+
+            if (empty($record['user_ids'])) {
+                $errors['user_ids'] = 'Please select at least one user.';
+            } else {
+                foreach ($record['user_ids'] as $uid) {
+                    $expectedRole = $this->model->userRoleById($uid);
+                    if (!$expectedRole || $expectedRole !== $record['role']) {
+                        $errors['user_ids'] = 'One or more selected users are invalid for this role.';
+                        break;
+                    }
+                }
+            }
 
             if (empty($errors)) {
-                if ($this->model->createEnrollment($record)) {
-                    $_SESSION['flash_success'] = 'Enrollment created successfully.';
-                    $this->redirectList();
+                $successCount = 0;
+                foreach ($record['user_ids'] as $uid) {
+                    if (!$this->model->enrollmentExists($record['course_id'], $uid)) {
+                        $enrollData = [
+                            'course_id' => $record['course_id'],
+                            'role' => $record['role'],
+                            'user_id' => $uid
+                        ];
+                        if ($this->model->createEnrollment($enrollData)) {
+                            $successCount++;
+                        }
+                    }
                 }
-                $errors['general'] = 'Unable to create enrollment.';
+                
+                if ($successCount > 0) {
+                    $_SESSION['flash_success'] = "$successCount enrollment(s) created successfully.";
+                    $this->redirectList();
+                } else {
+                    $errors['general'] = 'No new enrollments created. Selected users might already be enrolled.';
+                }
             }
         }
 

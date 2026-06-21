@@ -1,5 +1,7 @@
 <?php
 // views/teacher/attendance/methods_form.php
+$page_title = 'Attendance Method';
+$active_nav = 'attendance';
 require_once APP_ROOT . '/views/layouts/header.php';
 ?>
 

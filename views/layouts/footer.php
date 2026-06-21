@@ -19,16 +19,34 @@ document.addEventListener('click', () => {
 
 // Modal helpers
 function openModal(id) {
-  document.getElementById(id).classList.add('open');
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove('open');
   document.body.style.overflow = '';
 }
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+document.querySelectorAll('.btn-close').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const alert = btn.closest('.alert');
+    if (alert) {
+      alert.remove();
+      return;
+    }
+
+    const modal = btn.closest('.modal-overlay');
+    if (modal) {
+      closeModal(modal.id);
+    }
   });
 });
 </script>
